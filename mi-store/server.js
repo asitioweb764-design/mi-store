@@ -6,6 +6,17 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import db from "./db.js"; // tu conexión a Postgres
+// Crear tabla users si no existe
+await db.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'user'
+  )
+`);
+console.log("🗄️ Tabla 'users' verificada o creada correctamente");
+
 import bodyParser from "body-parser";
 import multer from "multer";
 
@@ -103,4 +114,5 @@ app.get("/check-admin", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
