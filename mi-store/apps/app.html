@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalles de la App</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .detalle-app {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    .detalle-app img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .detalle-app h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .detalle-app p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: #1a73e8;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background-color: #155ab6;
+    }
+
+    .volver {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      color: #1a73e8;
+      text-decoration: none;
+    }
+
+    .volver:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="detalle-app" id="detalle-app">
+    <p>Cargando datos de la app...</p>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    // Obtener ID desde la URL
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get("id"));
+
+    // Buscar app por ID
+    const app = appsData.find(a => a.id === id);
+
+    const contenedor = document.getElementById("detalle-app");
+
+    if (app) {
+      contenedor.innerHTML = `
+        <img src="${app.imagen}" alt="${app.nombre}" />
+        <h1>${app.nombre}</h1>
+        <p>${app.descripcion}</p>
+        <a href="${app.apk}" class="btn">Descargar APK</a>
+        <a href="index.html" class="volver">← Volver al catálogo</a>
+      `;
+    } else {
+      contenedor.innerHTML = `
+        <h2>App no encontrada 😢</h2>
+        <a href="index.html" class="volver">← Volver al catálogo</a>
+      `;
+    }
+  </script>
+
+</body>
+</html>

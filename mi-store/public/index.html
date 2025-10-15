@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mi Store</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.6/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-gray-50">
+  <header class="bg-blue-600 text-white p-4">
+    <div class="container flex items-center justify-between">
+      <h1 class="text-xl font-bold">Mi Store</h1>
+      <div class="flex items-center gap-3">
+        <a href="/login.html" class="text-sm bg-white text-blue-600 px-3 py-1 rounded">Admin</a>
+        <input id="busqueda" placeholder="Buscar apps..." class="p-2 rounded" />
+      </div>
+    </div>
+  </header>
+
+  <main class="container py-6">
+    <div id="appsGrid" class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
+  </main>
+
+  <script>
+    async function loadApps() {
+      const res = await fetch('/api/apps');
+      const apps = await res.json();
+      const grid = document.getElementById('appsGrid');
+      grid.innerHTML = '';
+      apps.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-lg shadow p-4 flex flex-col';
+        div.innerHTML = `
+          <img class="w-24 h-24 object-contain mx-auto" src="${a.imagen || '/img/default.png'}" alt="">
+          <h3 class="text-lg font-semibold mt-4">${a.nombre}</h3>
+          <p class="text-sm text-gray-600 mt-2">${a.descripcion || ''}</p>
+          <div class="mt-auto pt-4 flex gap-2">
+            <a href="/app.html?id=${a.id}" class="bg-blue-600 text-white px-3 py-2 rounded">Ver</a>
+            <button onclick="buy(${a.id})" class="bg-green-600 text-white px-3 py-2 rounded">Comprar</button>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    async function buy(appId) {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appId })
+      });
+      const data = await res.json();
+      if (data.url) window.location = data.url;
+      else alert('Error al iniciar pago');
+    }
+
+    document.getElementById('busqueda').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      document.querySelectorAll('#appsGrid > div').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+
+    loadApps();
+  </script>
+</body>
+</html>
