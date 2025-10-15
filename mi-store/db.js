@@ -1,12 +1,22 @@
-// db.js (versión ESM para Render + PostgreSQL)
+// db.js
+const Database = require('better-sqlite3');
+const path = require('path');
+const db = new Database(path.join(__dirname, 'store.db'));
 
-import pg from "pg";
-const { Pool } = pg;
+db.exec(`
+CREATE TABLE IF NOT EXISTS apps (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL,
+  descripcion TEXT,
+  imagen TEXT,
+  archivo TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now','localtime'))
+);
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL
+);
+`);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
-
-// Exporta el pool como "default"
-export default pool;
+module.exports = db;
