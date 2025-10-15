@@ -360,6 +360,34 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/webhook')) return res.status(404).send('Not found');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+import bcrypt from "bcrypt";
+import db from "./db.js"; // o el nombre de tu archivo de conexión con la DB
+
+app.get("/create-admin", async (req, res) => {
+  try {
+    // revisa si ya existe
+    const check = await db.query("SELECT * FROM users WHERE username = $1", ["admin"]);
+    if (check.rows.length > 0) {
+      return res.send("✅ Ya existe un usuario admin.");
+    }
+
+    // crea hash de la contraseña
+    const hash = await bcrypt.hash("123456", 10);
+
+    // inserta el nuevo admin
+    await db.query(
+      "INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3)",
+      ["admin", hash, "admin"]
+    );
+
+    res.send("✅ Admin creado correctamente: usuario 'admin' / contraseña '123456'");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Error al crear el admin.");
+  }
+});
+
 
 // Start
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
