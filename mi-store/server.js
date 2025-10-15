@@ -33,6 +33,26 @@ app.use(
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
 
+// Verificar que la tabla exista
+const initDB = async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT DEFAULT 'user'
+      )
+    `);
+    console.log("🗄️ Tabla 'users' verificada o creada correctamente");
+  } catch (err) {
+    console.error("❌ Error inicializando base de datos:", err);
+  }
+};
+
+// Llamar a la función de inicialización
+initDB();
+
 // ------------------------------
 // RUTA: crear admin temporal
 // ------------------------------
@@ -83,3 +103,4 @@ app.get("/check-admin", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
