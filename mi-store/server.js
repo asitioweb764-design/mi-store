@@ -1,4 +1,5 @@
-require('dotenv').config();
+import dotenv from "dotenv";
+dotenv.config();
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
@@ -390,5 +391,6 @@ app.get("/create-admin", async (req, res) => {
 
 // Start
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
