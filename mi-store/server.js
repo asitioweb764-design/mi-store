@@ -360,7 +360,7 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/webhook')) return res.status(404).send('Not found');
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
 import db from "./db.js"; // o el nombre de tu archivo de conexión con la DB
 
 app.get("/create-admin", async (req, res) => {
@@ -390,4 +390,5 @@ app.get("/create-admin", async (req, res) => {
 
 // Start
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
