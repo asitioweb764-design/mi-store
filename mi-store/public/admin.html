@@ -1,135 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Admin Panel</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.6/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de administración</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    .logout { position: absolute; top: 10px; right: 10px; }
+  </style>
 </head>
-<body class="bg-gray-50">
-  <header class="bg-blue-600 text-white p-4">
-    <div class="container flex justify-between items-center">
-      <h1 class="text-lg font-bold">Admin</h1>
-      <div>
-        <span id="userName" class="mr-3"></span>
-        <button id="logoutBtn" class="bg-red-600 px-3 py-1 rounded">Cerrar sesión</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="container py-6">
-    <section class="bg-white p-4 rounded shadow mb-6">
-      <h2 class="font-bold mb-3">Subir nueva app</h2>
-      <form id="uploadForm" class="grid grid-cols-1 gap-3">
-        <input id="nombre" placeholder="Nombre" class="p-2 border rounded"/>
-        <textarea id="descripcion" placeholder="Descripción" class="p-2 border rounded"></textarea>
-        <input id="price_cents" placeholder="Precio en centavos (ej:199 = $1.99)" class="p-2 border rounded"/>
-        <input id="imagen" type="file" accept="image/*"/>
-        <input id="archivo" type="file" accept=".apk,.zip"/>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Subir</button>
-        <div id="progressContainer" class="hidden"><div id="progressBar" class="h-2 bg-blue-600 rounded"></div></div>
-        <p id="msg"></p>
-      </form>
-    </section>
-
-    <section class="bg-white p-4 rounded shadow">
-      <h2 class="font-bold mb-3">Apps</h2>
-      <table class="w-full table-auto" id="appsTable">
-        <thead><tr><th>Imagen</th><th>Nombre</th><th>Precio</th><th>Acciones</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-  </main>
+<body>
+  <h1>Panel de administración</h1>
+  <p>Bienvenido, administrador 👋</p>
+  <button class="logout" onclick="logout()">Cerrar sesión</button>
 
   <script>
-    // session check
-    fetch('/api/admin/session').then(r => r.json()).then(d => {
-      if (!d.logged) location.href = '/login.html';
-      document.getElementById('userName').textContent = d.user.username;
-    });
-
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await fetch('/api/admin/logout', { method: 'POST' });
-      location.href = '/login.html';
-    });
-
-    async function loadApps() {
-      const res = await fetch('/api/admin/apps');
-      const apps = await res.json();
-      const tbody = document.querySelector('#appsTable tbody');
-      tbody.innerHTML = '';
-      apps.forEach(a => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-2"><img src="${a.imagen || '/img/default.png'}" class="w-12 h-12 object-contain"/></td>
-          <td class="p-2"><input data-id="${a.id}" data-field="nombre" value="${a.nombre}" class="p-1 border rounded w-full"/></td>
-          <td class="p-2"><input data-id="${a.id}" data-field="price_cents" value="${a.price_cents || 199}" class="p-1 border rounded w-full"/></td>
-          <td class="p-2">
-            <button onclick="save(${a.id})" class="bg-green-600 text-white px-2 py-1 rounded">Guardar</button>
-            <button onclick="remove(${a.id})" class="bg-red-600 text-white px-2 py-1 rounded">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function save(id) {
-      const nombre = document.querySelector(`[data-id="${id}"][data-field="nombre"]`).value;
-      const price_cents = document.querySelector(`[data-id="${id}"][data-field="price_cents"]`).value;
-      const res = await fetch(`/api/admin/apps/${id}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ nombre, price_cents: parseInt(price_cents,10) })
-      });
+    async function checkSession() {
+      const res = await fetch("/api/admin/check");
       const data = await res.json();
-      alert(data.success ? 'Guardado' : 'Error');
-      loadApps();
+      if (!data.success) {
+        window.location.href = "/login.html";
+      }
     }
-
-    async function remove(id) {
-      if (!confirm('¿Eliminar?')) return;
-      const res = await fetch(`/api/admin/apps/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) loadApps();
+    async function logout() {
+      await fetch("/api/logout");
+      window.location.href = "/login.html";
     }
-
-    document.getElementById('uploadForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const form = e.target;
-      const fd = new FormData();
-      fd.append('nombre', document.getElementById('nombre').value);
-      fd.append('descripcion', document.getElementById('descripcion').value);
-      fd.append('price_cents', document.getElementById('price_cents').value || '199');
-      const img = document.getElementById('imagen').files[0];
-      const file = document.getElementById('archivo').files[0];
-      if (img) fd.append('imagen', img);
-      if (file) fd.append('archivo', file);
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', '/api/admin/upload', true);
-      xhr.upload.onprogress = e2 => {
-        if (e2.lengthComputable) {
-          const pct = (e2.loaded / e2.total) * 100;
-          document.getElementById('progressContainer').classList.remove('hidden');
-          document.getElementById('progressBar').style.width = pct + '%';
-        }
-      };
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          document.getElementById('msg').textContent = 'Subida correcta';
-          document.getElementById('msg').style.color = 'green';
-          form.reset();
-          loadApps();
-        } else {
-          document.getElementById('msg').textContent = 'Error al subir';
-          document.getElementById('msg').style.color = 'red';
-        }
-        document.getElementById('progressContainer').classList.add('hidden');
-        document.getElementById('progressBar').style.width = '0%';
-      };
-      xhr.send(fd);
-    });
-
-    loadApps();
+    checkSession();
   </script>
 </body>
 </html>
