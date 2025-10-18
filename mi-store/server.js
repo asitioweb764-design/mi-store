@@ -9,7 +9,6 @@ import dbModule from "./db.js";
 const db = dbModule.default || dbModule;
 import bodyParser from "body-parser";
 import multer from "multer";
-import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
 
@@ -299,6 +298,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
