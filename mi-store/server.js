@@ -96,6 +96,23 @@ app.get("/check-admin", async (req, res) => {
     res.status(500).send("❌ Error al consultar la base de datos.");
   }
 });
+// ------------------------------
+// RUTA TEMPORAL: reparar tabla users
+// ------------------------------
+app.get("/fix-users-table", async (req, res) => {
+  try {
+    await db.query(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user';`);
+    res.send("✅ Columna 'role' agregada correctamente a la tabla 'users'.");
+  } catch (err) {
+    if (err.code === "42701") {
+      // columna ya existe
+      res.send("ℹ️ La columna 'role' ya existe, no se hizo nada.");
+    } else {
+      console.error(err);
+      res.status(500).send("❌ Error al modificar la tabla: " + err.message);
+    }
+  }
+});
 
 // ------------------------------
 // INICIO DEL SERVIDOR
@@ -103,5 +120,6 @@ app.get("/check-admin", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
