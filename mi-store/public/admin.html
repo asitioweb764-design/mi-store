@@ -3,173 +3,212 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel de Administración - Mi Store</title>
+  <title>Panel Admin | Mi Store</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
   <style>
-    * { box-sizing: border-box; }
     body {
+      background-color: #f5f7fa;
       font-family: "Poppins", sans-serif;
-      background: #f4f6f8;
-      margin: 0; padding: 0;
     }
     header {
-      background: #007bff; color: white;
+      background: #007bff;
+      color: white;
       padding: 1rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    header h1 { font-size: 1.2rem; margin: 0; }
-    header button {
-      background: white; color: #007bff;
-      border: none; border-radius: .5rem; padding: .5rem .8rem;
-      cursor: pointer; font-weight: 600;
-    }
-    main {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    form {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 1rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-    input, textarea {
-      width: 100%; margin-bottom: 1rem;
-      padding: .6rem; border: 1px solid #ccc; border-radius: .5rem;
-    }
-    input[type="file"] {
-      background: #f9f9f9;
-      border: 1px dashed #aaa;
-      padding: .5rem;
-    }
-    button {
-      background: #007bff; color: white;
-      border: none; padding: .7rem 1rem;
-      border-radius: .5rem; cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover { background: #0056b3; }
-    .app-list {
-      display: grid; gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    }
-    .card {
-      background: white; border-radius: .8rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 1rem; position: relative;
-      display: flex; flex-direction: column;
+      display: flex;
       justify-content: space-between;
+      align-items: center;
     }
-    .card img {
-      width: 100%; height: 150px; object-fit: cover;
-      border-radius: .5rem;
+    header h1 {
+      font-size: 1.5rem;
     }
-    .delete {
-      position: absolute; top: 10px; right: 10px;
-      background: crimson; color: white;
-      border: none; border-radius: .5rem;
-      padding: .4rem .6rem; cursor: pointer;
+    .container {
+      margin-top: 2rem;
+      max-width: 900px;
+    }
+    .app-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .app-card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+      color: #666;
     }
     @media (max-width: 600px) {
-      header { flex-direction: column; text-align: center; gap: .5rem; }
-      main { margin: 1rem; }
+      header h1 {
+        font-size: 1.2rem;
+      }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Panel de Administración</h1>
-    <div>
-      <button onclick="goToStore()">Ver Tienda</button>
-      <button onclick="logout()">Cerrar sesión</button>
-    </div>
+    <a href="/" class="btn btn-light btn-sm">🌐 Ver Tienda</a>
   </header>
 
-  <main>
-    <form id="appForm">
-      <h3>Agregar nueva app</h3>
-      <input type="text" id="name" placeholder="Nombre de la app" required />
-      <textarea id="description" placeholder="Descripción"></textarea>
-      <label>📸 Imagen de la app:</label>
-      <input type="file" id="imageFile" accept="image/*" />
-      <label>📦 Archivo APK (opcional):</label>
-      <input type="file" id="apkFile" accept=".apk" />
-      <button type="submit">Agregar App</button>
+  <div class="container">
+    <h3 class="mb-3">Agregar Nueva App</h3>
+
+    <form id="appForm" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="name" class="form-label">Nombre de la app</label>
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          name="name"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Descripción</label>
+        <textarea
+          class="form-control"
+          id="description"
+          name="description"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="imageFile" class="form-label">Imagen (PNG/JPG)</label>
+        <input
+          type="file"
+          class="form-control"
+          id="imageFile"
+          name="image"
+          accept="image/*"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="apkFile" class="form-label">Archivo APK (opcional)</label>
+        <input
+          type="file"
+          class="form-control"
+          id="apkFile"
+          name="file"
+          accept=".apk,.zip"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        🚀 Agregar App
+      </button>
     </form>
 
-    <div class="app-list" id="appList"></div>
-  </main>
+    <hr class="my-4" />
+
+    <h3 class="mb-3">📱 Aplicaciones Publicadas</h3>
+    <div id="appsList"></div>
+  </div>
+
+  <footer>
+    <p>© 2025 Mi Store - Panel de Administración</p>
+  </footer>
 
   <script>
-    async function checkSession() {
-      const res = await fetch("/api/admin/check");
-      const data = await res.json();
-      if (!data.success) window.location.href = "/login.html";
-    }
+    // Cargar apps al iniciar
+    document.addEventListener("DOMContentLoaded", loadApps);
 
-    async function uploadFile(file) {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (data.success) return data.url;
-      throw new Error(data.error || "Error subiendo archivo");
-    }
-
-    async function loadApps() {
-      const res = await fetch("/api/apps");
-      const apps = await res.json();
-      const list = document.getElementById("appList");
-      list.innerHTML = "";
-      apps.forEach(app => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <img src="${app.image_url || "https://via.placeholder.com/300x150"}" />
-          <h3>${app.name}</h3>
-          <p>${app.description || ""}</p>
-          <a href="${app.file_url}" target="_blank">📥 Descargar</a>
-          <button class="delete" onclick="deleteApp(${app.id})">✖</button>
-        `;
-        list.appendChild(card);
-      });
-    }
-
-    async function deleteApp(id) {
-      if (!confirm("¿Seguro que deseas eliminar esta app?")) return;
-      await fetch("/api/apps/" + id, { method: "DELETE" });
-      loadApps();
-    }
-
-    document.getElementById("appForm").addEventListener("submit", async e => {
+    // Enviar formulario
+    document.getElementById("appForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const name = document.getElementById("name").value;
       const description = document.getElementById("description").value;
       const imageFile = document.getElementById("imageFile").files[0];
       const apkFile = document.getElementById("apkFile").files[0];
 
-      let image_url = "";
-      let file_url = "";
+      if (!imageFile) {
+        alert("Por favor, selecciona una imagen.");
+        return;
+      }
 
-      if (imageFile) image_url = await uploadFile(imageFile);
-      if (apkFile) file_url = await uploadFile(apkFile);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("image", imageFile);
+      if (apkFile) formData.append("file", apkFile);
 
-      await fetch("/api/apps", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description, image_url, file_url }),
-      });
+      try {
+        const res = await fetch("/upload-app", {
+          method: "POST",
+          body: formData,
+        });
 
-      e.target.reset();
-      loadApps();
+        const data = await res.json();
+
+        if (res.ok) {
+          alert(data.message || "✅ App agregada correctamente");
+          e.target.reset();
+          loadApps();
+        } else {
+          alert("❌ Error al subir la app");
+          console.error(data);
+        }
+      } catch (error) {
+        console.error("Error al subir la app:", error);
+        alert("❌ Error al conectar con el servidor");
+      }
     });
 
-    function logout() { fetch("/api/logout").then(() => location.href = "/login.html"); }
-    function goToStore() { location.href = "/"; }
+    // Cargar apps
+    async function loadApps() {
+      try {
+        const res = await fetch("/api/apps");
+        const apps = await res.json();
 
-    checkSession();
-    loadApps();
+        const container = document.getElementById("appsList");
+        container.innerHTML = "";
+
+        if (apps.length === 0) {
+          container.innerHTML =
+            "<p class='text-muted'>Aún no hay aplicaciones publicadas.</p>";
+          return;
+        }
+
+        apps.forEach((app) => {
+          const card = document.createElement("div");
+          card.className = "app-card row align-items-center";
+
+          card.innerHTML = `
+            <div class="col-md-3">
+              <img src="${app.image_url}" alt="${app.name}" />
+            </div>
+            <div class="col-md-6">
+              <h5>${app.name}</h5>
+              <p>${app.description || ""}</p>
+            </div>
+            <div class="col-md-3 text-end">
+              ${
+                app.file_url
+                  ? `<a href="${app.file_url}" class="btn btn-success btn-sm" target="_blank">⬇️ Descargar</a>`
+                  : `<button class="btn btn-secondary btn-sm" disabled>Sin APK</button>`
+              }
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error cargando apps:", error);
+      }
+    }
   </script>
 </body>
 </html>
