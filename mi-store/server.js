@@ -1,326 +1,182 @@
-// server.js
 import express from "express";
-import dotenv from "dotenv";
-import bcrypt from "bcrypt";
 import session from "express-session";
-import path from "path";
-import { fileURLToPath } from "url";
-import dbModule from "./db.js";
-const db = dbModule.default || dbModule;
-import bodyParser from "body-parser";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
+import dbModule from "./db.js";
 
-// Configuración de Cloudinary
+const app = express();
+const db = dbModule;
+
+// ✅ Middleware básico
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
+// ⚙️ Sesión temporal (solo para desarrollo)
+app.use(
+  session({
+    secret: "mi-store-secret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// 🧰 Configurar Multer (archivos en memoria)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// ☁️ Configurar Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configuración de Multer (para manejar archivos en memoria)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// 🧱 Verificar o crear tablas automáticamente
+(async () => {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS apps (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      description TEXT,
+      image_url TEXT,
+      file_url TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
 
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      role VARCHAR(50) DEFAULT 'user'
+    );
+  `);
 
-dotenv.config();
+  console.log("📱 Tabla 'apps' verificada o creada correctamente");
+  console.log("🗄️ Tabla 'users' verificada o creada correctamente");
+})();
 
-// Configuración base
-const app = express();
-const port = process.env.PORT || 3000;
+// 🧩 Subir imagen y APK
+app.post(
+  "/upload-app",
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const { name, description } = req.body;
+      const imageFile = req.files?.image?.[0];
+      const apkFile = req.files?.file?.[0];
 
-// Necesario para obtener __dirname en ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+      if (!imageFile) {
+        return res.status(400).json({ message: "Falta la imagen de la app." });
+      }
 
-// Middlewares
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "mi-super-secreto",
-    resave: false,
-    saveUninitialized: false,
-  })
+      // 📤 Subir imagen a Cloudinary
+      const uploadImage = new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "mi-store/apps" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result.secure_url);
+          }
+        );
+        streamifier.createReadStream(imageFile.buffer).pipe(uploadStream);
+      });
+
+      // 📦 Subir archivo APK si existe
+      const uploadFile = apkFile
+        ? new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              { folder: "mi-store/files", resource_type: "raw" },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result.secure_url);
+              }
+            );
+            streamifier.createReadStream(apkFile.buffer).pipe(uploadStream);
+          })
+        : Promise.resolve(null);
+
+      const [image_url, file_url] = await Promise.all([
+        uploadImage,
+        uploadFile,
+      ]);
+
+      // 💾 Guardar en PostgreSQL
+      await db.query(
+        `INSERT INTO apps (name, description, image_url, file_url)
+         VALUES ($1, $2, $3, $4)`,
+        [name, description, image_url, file_url]
+      );
+
+      res.json({ message: "✅ App agregada correctamente" });
+    } catch (error) {
+      console.error("Error subiendo archivo:", error);
+      res
+        .status(500)
+        .json({ message: "❌ Error al subir la app", error: error.message });
+    }
+  }
 );
 
-// Archivos estáticos (frontend)
-app.use(express.static(path.join(__dirname, "public")));
-
-// ------------------------------
-// 🧱 INICIALIZAR BASE DE DATOS
-// ------------------------------
-const initDB = async () => {
-  try {
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        role TEXT DEFAULT 'user'
-      )
-    `);
-    console.log("🗄️ Tabla 'users' verificada o creada correctamente");
-  } catch (err) {
-    console.error("❌ Error inicializando base de datos:", err);
-  }
-};
-
-// Ejecutar inicialización
-initDB();
-
-// ------------------------------
-// 🧱 Inicializar tabla de apps
-// ------------------------------
-const initAppsTable = async () => {
-  try {
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS apps (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        image_url TEXT,
-        file_url TEXT,
-        created_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-    console.log("📱 Tabla 'apps' verificada o creada correctamente");
-  } catch (err) {
-    console.error("❌ Error creando tabla 'apps':", err);
-  }
-};
-
-initAppsTable();
-
-// ------------------------------
-// RUTA: crear admin temporal
-// ------------------------------
-app.get("/create-admin", async (req, res) => {
-  try {
-    const check = await db.query("SELECT * FROM users WHERE username = $1", ["admin"]);
-    if (check.rows.length > 0) {
-      return res.send("✅ Ya existe un usuario admin.");
-    }
-
-    const hash = await bcrypt.hash("123456", 10);
-    await db.query(
-      "INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3)",
-      ["admin", hash, "admin"]
-    );
-
-    res.send("✅ Admin creado correctamente: usuario 'admin' / contraseña '123456'");
-  } catch (err) {
-    console.error("❌ Error al crear el admin:", err);
-    res.status(500).send("❌ Error al crear el admin.");
-  }
-});
-
-// ------------------------------
-// RUTA: verificar admins existentes
-// ------------------------------
-app.get("/check-admin", async (req, res) => {
-  try {
-    const result = await db.query("SELECT username, role FROM users WHERE role = 'admin'");
-    if (result.rows.length === 0) {
-      return res.send("❌ No hay ningún usuario admin en la base de datos.");
-    }
-    res.send(
-      `✅ Admin encontrado: ${result.rows.map((u) => u.username).join(", ")} (${result.rows.length} total)`
-    );
-  } catch (err) {
-    console.error("❌ Error al consultar la base de datos:", err);
-    res.status(500).send("❌ Error al consultar la base de datos.");
-  }
-});
-// ------------------------------
-// RUTA TEMPORAL: reparar tabla users
-// ------------------------------
-app.get("/fix-users-table", async (req, res) => {
-  try {
-    await db.query(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user';`);
-    res.send("✅ Columna 'role' agregada correctamente a la tabla 'users'.");
-  } catch (err) {
-    if (err.code === "42701") {
-      // columna ya existe
-      res.send("ℹ️ La columna 'role' ya existe, no se hizo nada.");
-    } else {
-      console.error(err);
-      res.status(500).send("❌ Error al modificar la tabla: " + err.message);
-    }
-  }
-});
-
-// ------------------------------
-// 🔑 LOGIN
-// ------------------------------
-app.post("/api/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const result = await db.query("SELECT * FROM users WHERE username = $1", [username]);
-
-    if (result.rows.length === 0) {
-      return res.status(401).json({ success: false, message: "Usuario no encontrado" });
-    }
-
-    const user = result.rows[0];
-    const match = await bcrypt.compare(password, user.password_hash);
-
-    if (!match) {
-      return res.status(401).json({ success: false, message: "Contraseña incorrecta" });
-    }
-
-    // Guardar sesión
-    req.session.user = {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    };
-
-    res.json({ success: true, role: user.role });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Error interno del servidor" });
-  }
-});
-
-// ------------------------------
-// 🚪 LOGOUT
-// ------------------------------
-app.get("/api/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login.html");
-  });
-});
-
-// ------------------------------
-// 🔐 RUTA PROTEGIDA DE EJEMPLO
-// ------------------------------
-app.get("/api/admin/check", (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ success: false, message: "No autenticado" });
-  }
-  if (req.session.user.role !== "admin") {
-    return res.status(403).json({ success: false, message: "No autorizado" });
-  }
-  res.json({ success: true, message: "Bienvenido, administrador" });
-});
-
-// ------------------------------
-// 📦 API: CRUD de apps
-// ------------------------------
-
-// (1) Obtener todas las apps
+// 📋 Obtener todas las apps
 app.get("/api/apps", async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM apps ORDER BY id DESC");
+    const result = await db.query(
+      "SELECT id, name, description, image_url, file_url FROM apps ORDER BY id DESC"
+    );
     res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al obtener las apps" });
-  }
-});
-
-// (2) Subir una nueva app
-app.post("/api/apps", async (req, res) => {
-  try {
-    if (!req.session.user || req.session.user.role !== "admin") {
-      return res.status(403).json({ error: "No autorizado" });
-    }
-
-    const { name, description, image_url, file_url } = req.body;
-    await db.query(
-      "INSERT INTO apps (name, description, image_url, file_url) VALUES ($1, $2, $3, $4)",
-      [name, description, image_url, file_url]
-    );
-
-    res.json({ success: true, message: "App agregada correctamente" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al subir la app" });
-  }
-});
-
-// (3) Eliminar una app
-app.delete("/api/apps/:id", async (req, res) => {
-  try {
-    if (!req.session.user || req.session.user.role !== "admin") {
-      return res.status(403).json({ error: "No autorizado" });
-    }
-
-    const { id } = req.params;
-    await db.query("DELETE FROM apps WHERE id = $1", [id]);
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al eliminar la app" });
-  }
-});
-
-// Subida de imagen + archivo APK
-app.post("/upload-app", upload.fields([{ name: "image" }, { name: "file" }]), async (req, res) => {
-  try {
-    const { name, description } = req.body;
-
-    // 📸 Subida de imagen
-    const uploadImagePromise = new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "mi-store/images" },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      );
-      streamifier.createReadStream(req.files.image[0].buffer).pipe(uploadStream);
-    });
-
-    // 📦 Subida del APK (como archivo "raw")
-    const uploadFilePromise = new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "mi-store/files", resource_type: "raw" }, // ⚠️ AQUÍ ESTÁ LA CLAVE
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result);
-        }
-      );
-      streamifier.createReadStream(req.files.file[0].buffer).pipe(uploadStream);
-    });
-
-    // Esperamos ambas subidas
-    const [resultImage, resultFile] = await Promise.all([
-      uploadImagePromise,
-      uploadFilePromise,
-    ]);
-
-    // Guardar en base de datos
-    await db.query(
-      "INSERT INTO apps (name, description, image_url, file_url) VALUES ($1, $2, $3, $4)",
-      [name, description, resultImage.secure_url, resultFile.secure_url]
-    );
-
-    res.status(200).json({ message: "✅ App subida correctamente" });
   } catch (error) {
-    console.error("❌ Error subiendo archivo:", error);
-    res.status(500).json({ message: "Error subiendo archivo", error });
+    console.error("❌ Error al obtener apps:", error);
+    res.status(500).json({ message: "Error al obtener apps" });
   }
 });
 
-
-
-// ------------------------------
-// INICIO DEL SERVIDOR
-// ------------------------------
-app.listen(port, () => {
-  console.log(`🚀 Servidor corriendo en el puerto ${port}`);
+// 🧑‍💻 Verificar si existe admin
+app.get("/check-admin", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM users WHERE role = 'admin'");
+    if (result.rows.length > 0)
+      res.json({ message: "✅ Ya existe un usuario admin." });
+    else res.json({ message: "❌ No hay ningún usuario admin en la base de datos." });
+  } catch (error) {
+    console.error("❌ Error al consultar la base de datos:", error);
+    res.status(500).json({ message: "Error al consultar la base de datos." });
+  }
 });
 
+// 🧑‍💼 Crear admin si no existe
+import bcrypt from "bcrypt";
+app.get("/create-admin", async (req, res) => {
+  try {
+    const adminUser = await db.query("SELECT * FROM users WHERE role = 'admin'");
+    if (adminUser.rows.length > 0)
+      return res.json({ message: "✅ Ya existe un usuario admin." });
 
+    const hashedPassword = await bcrypt.hash("admin123", 10);
+    await db.query(
+      "INSERT INTO users (username, password, role) VALUES ($1, $2, 'admin')",
+      ["admin", hashedPassword]
+    );
+    res.json({ message: "✅ Usuario admin creado (usuario: admin / contraseña: admin123)" });
+  } catch (error) {
+    console.error("❌ Error al crear admin:", error);
+    res.status(500).json({ message: "Error al crear admin" });
+  }
+});
 
+// 🌐 Página principal (index)
+app.get("/", (req, res) => {
+  res.sendFile("index.html", { root: "public" });
+});
 
-
-
-
-
-
-
-
+// 🚀 Iniciar servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+});
