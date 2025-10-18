@@ -259,11 +259,47 @@ app.delete("/api/apps/:id", async (req, res) => {
 });
 
 // ------------------------------
+// ☁️ Subida de archivos a Cloudinary
+// ------------------------------
+app.post("/api/upload", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(403).json({ error: "No autorizado" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No se subió ningún archivo" });
+    }
+
+    const streamUpload = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "mi-store" },
+          (error, result) => {
+            if (result) resolve(result);
+            else reject(error);
+          }
+        );
+        streamifier.createReadStream(fileBuffer).pipe(stream);
+      });
+    };
+
+    const uploadResult = await streamUpload(req.file.buffer);
+    res.json({ success: true, url: uploadResult.secure_url });
+  } catch (err) {
+    console.error("Error subiendo archivo:", err);
+    res.status(500).json({ error: "Error al subir archivo" });
+  }
+});
+
+
+// ------------------------------
 // INICIO DEL SERVIDOR
 // ------------------------------
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
