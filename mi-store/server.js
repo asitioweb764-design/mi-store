@@ -57,6 +57,29 @@ const initDB = async () => {
 initDB();
 
 // ------------------------------
+// 🧱 Inicializar tabla de apps
+// ------------------------------
+const initAppsTable = async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS apps (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        image_url TEXT,
+        file_url TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    console.log("📱 Tabla 'apps' verificada o creada correctamente");
+  } catch (err) {
+    console.error("❌ Error creando tabla 'apps':", err);
+  }
+};
+
+initAppsTable();
+
+// ------------------------------
 // RUTA: crear admin temporal
 // ------------------------------
 app.get("/create-admin", async (req, res) => {
@@ -115,31 +138,6 @@ app.get("/fix-users-table", async (req, res) => {
 });
 
 // ------------------------------
-// RUTA TEMPORAL: recrear usuario admin
-// ------------------------------
-app.get("/recreate-admin", async (req, res) => {
-  try {
-    // Eliminar cualquier admin viejo
-    await db.query("DELETE FROM users WHERE username = 'admin'");
-
-    // Crear nuevo hash con la contraseña "123456"
-    const hash = await bcrypt.hash("123456", 10);
-
-    // Insertar nuevo admin
-    await db.query(
-      "INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3)",
-      ["admin", hash, "admin"]
-    );
-
-    res.send("✅ Usuario admin recreado correctamente: admin / 123456");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("❌ Error al recrear el admin: " + err.message);
-  }
-});
-
-
-// ------------------------------
 // 🔑 LOGIN
 // ------------------------------
 app.post("/api/login", async (req, res) => {
@@ -195,11 +193,63 @@ app.get("/api/admin/check", (req, res) => {
 });
 
 // ------------------------------
+// 📦 API: CRUD de apps
+// ------------------------------
+
+// (1) Obtener todas las apps
+app.get("/api/apps", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM apps ORDER BY id DESC");
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener las apps" });
+  }
+});
+
+// (2) Subir una nueva app
+app.post("/api/apps", async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(403).json({ error: "No autorizado" });
+    }
+
+    const { name, description, image_url, file_url } = req.body;
+    await db.query(
+      "INSERT INTO apps (name, description, image_url, file_url) VALUES ($1, $2, $3, $4)",
+      [name, description, image_url, file_url]
+    );
+
+    res.json({ success: true, message: "App agregada correctamente" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al subir la app" });
+  }
+});
+
+// (3) Eliminar una app
+app.delete("/api/apps/:id", async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(403).json({ error: "No autorizado" });
+    }
+
+    const { id } = req.params;
+    await db.query("DELETE FROM apps WHERE id = $1", [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al eliminar la app" });
+  }
+});
+
+// ------------------------------
 // INICIO DEL SERVIDOR
 // ------------------------------
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
