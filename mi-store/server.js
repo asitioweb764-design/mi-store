@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
+import dbModule from "./db.js";
 const db = dbModule.default || dbModule;
 import bodyParser from "body-parser";
 import multer from "multer";
@@ -102,4 +103,5 @@ app.get("/check-admin", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
