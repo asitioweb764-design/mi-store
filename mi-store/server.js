@@ -113,26 +113,61 @@ app.get("/fix-users-table", async (req, res) => {
     }
   }
 });
-// ------------------------------
-// RUTA TEMPORAL: corregir el rol del usuario admin
-// ------------------------------
-app.get("/fix-admin-role", async (req, res) => {
-  try {
-    const result = await db.query(
-      "UPDATE users SET role = 'admin' WHERE username = 'admin' RETURNING *;"
-    );
 
-    if (result.rowCount === 0) {
-      return res.send("❌ No se encontró un usuario con username = 'admin'.");
+// ------------------------------
+// 🔑 LOGIN
+// ------------------------------
+app.post("/api/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const result = await db.query("SELECT * FROM users WHERE username = $1", [username]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, message: "Usuario no encontrado" });
     }
 
-    res.send("✅ Rol de 'admin' asignado correctamente al usuario 'admin'.");
+    const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
+
+    if (!match) {
+      return res.status(401).json({ success: false, message: "Contraseña incorrecta" });
+    }
+
+    // Guardar sesión
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    };
+
+    res.json({ success: true, role: user.role });
   } catch (err) {
     console.error(err);
-    res.status(500).send("❌ Error al actualizar el rol: " + err.message);
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 });
 
+// ------------------------------
+// 🚪 LOGOUT
+// ------------------------------
+app.get("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/login.html");
+  });
+});
+
+// ------------------------------
+// 🔐 RUTA PROTEGIDA DE EJEMPLO
+// ------------------------------
+app.get("/api/admin/check", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: "No autenticado" });
+  }
+  if (req.session.user.role !== "admin") {
+    return res.status(403).json({ success: false, message: "No autorizado" });
+  }
+  res.json({ success: true, message: "Bienvenido, administrador" });
+});
 
 // ------------------------------
 // INICIO DEL SERVIDOR
@@ -140,6 +175,7 @@ app.get("/fix-admin-role", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
