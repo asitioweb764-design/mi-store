@@ -113,6 +113,26 @@ app.get("/fix-users-table", async (req, res) => {
     }
   }
 });
+// ------------------------------
+// RUTA TEMPORAL: corregir el rol del usuario admin
+// ------------------------------
+app.get("/fix-admin-role", async (req, res) => {
+  try {
+    const result = await db.query(
+      "UPDATE users SET role = 'admin' WHERE username = 'admin' RETURNING *;"
+    );
+
+    if (result.rowCount === 0) {
+      return res.send("❌ No se encontró un usuario con username = 'admin'.");
+    }
+
+    res.send("✅ Rol de 'admin' asignado correctamente al usuario 'admin'.");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Error al actualizar el rol: " + err.message);
+  }
+});
+
 
 // ------------------------------
 // INICIO DEL SERVIDOR
@@ -120,6 +140,7 @@ app.get("/fix-users-table", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
