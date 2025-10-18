@@ -9,6 +9,21 @@ import dbModule from "./db.js";
 const db = dbModule.default || dbModule;
 import bodyParser from "body-parser";
 import multer from "multer";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
+
+// Configuración de Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configuración de Multer (para manejar archivos en memoria)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
 
 dotenv.config();
 
@@ -249,6 +264,7 @@ app.delete("/api/apps/:id", async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
