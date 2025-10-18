@@ -115,6 +115,31 @@ app.get("/fix-users-table", async (req, res) => {
 });
 
 // ------------------------------
+// RUTA TEMPORAL: recrear usuario admin
+// ------------------------------
+app.get("/recreate-admin", async (req, res) => {
+  try {
+    // Eliminar cualquier admin viejo
+    await db.query("DELETE FROM users WHERE username = 'admin'");
+
+    // Crear nuevo hash con la contraseña "123456"
+    const hash = await bcrypt.hash("123456", 10);
+
+    // Insertar nuevo admin
+    await db.query(
+      "INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3)",
+      ["admin", hash, "admin"]
+    );
+
+    res.send("✅ Usuario admin recreado correctamente: admin / 123456");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Error al recrear el admin: " + err.message);
+  }
+});
+
+
+// ------------------------------
 // 🔑 LOGIN
 // ------------------------------
 app.post("/api/login", async (req, res) => {
@@ -175,6 +200,7 @@ app.get("/api/admin/check", (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
