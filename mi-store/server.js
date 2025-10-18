@@ -257,39 +257,54 @@ app.delete("/api/apps/:id", async (req, res) => {
   }
 });
 
-// ------------------------------
-// ☁️ Subida de archivos a Cloudinary
-// ------------------------------
-app.post("/api/upload", upload.single("file"), async (req, res) => {
+// Subida de imagen + archivo APK
+app.post("/upload-app", upload.fields([{ name: "image" }, { name: "file" }]), async (req, res) => {
   try {
-    if (!req.session.user || req.session.user.role !== "admin") {
-      return res.status(403).json({ error: "No autorizado" });
-    }
+    const { name, description } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ error: "No se subió ningún archivo" });
-    }
+    // 📸 Subida de imagen
+    const uploadImagePromise = new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "mi-store/images" },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      streamifier.createReadStream(req.files.image[0].buffer).pipe(uploadStream);
+    });
 
-    const streamUpload = (fileBuffer) => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "mi-store" },
-          (error, result) => {
-            if (result) resolve(result);
-            else reject(error);
-          }
-        );
-        streamifier.createReadStream(fileBuffer).pipe(stream);
-      });
-    };
+    // 📦 Subida del APK (como archivo "raw")
+    const uploadFilePromise = new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "mi-store/files", resource_type: "raw" }, // ⚠️ AQUÍ ESTÁ LA CLAVE
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
+      streamifier.createReadStream(req.files.file[0].buffer).pipe(uploadStream);
+    });
 
-    const uploadResult = await streamUpload(req.file.buffer);
-    res.json({ success: true, url: uploadResult.secure_url });
-  } catch (err) {
-    console.error("Error subiendo archivo:", err);
-    res.status(500).json({ error: "Error al subir archivo" });
+    // Esperamos ambas subidas
+    const [resultImage, resultFile] = await Promise.all([
+      uploadImagePromise,
+      uploadFilePromise,
+    ]);
+
+    // Guardar en base de datos
+    await db.query(
+      "INSERT INTO apps (name, description, image_url, file_url) VALUES ($1, $2, $3, $4)",
+      [name, description, resultImage.secure_url, resultFile.secure_url]
+    );
+
+    res.status(200).json({ message: "✅ App subida correctamente" });
+  } catch (error) {
+    console.error("❌ Error subiendo archivo:", error);
+    res.status(500).json({ message: "Error subiendo archivo", error });
   }
 });
+
 
 
 // ------------------------------
@@ -298,6 +313,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
+
 
 
 
