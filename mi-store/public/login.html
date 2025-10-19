@@ -65,26 +65,34 @@
   <script>
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+      const errorDiv = document.getElementById("error");
+      errorDiv.innerText = "";
 
-      const res = await fetch("/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (data.success) {
-        alert(data.message);
-        if (data.role === "admin") {
-          window.location.href = "/admin.html";
+        if (data.success) {
+          alert("✅ Inicio de sesión exitoso");
+          if (data.role === "admin") {
+            window.location.href = "/admin.html";
+          } else {
+            window.location.href = "/";
+          }
         } else {
-          window.location.href = "/";
+          errorDiv.innerText = data.message || "❌ Usuario o contraseña incorrectos";
         }
-      } else {
-        document.getElementById("error").innerText = data.message || "Error al iniciar sesión";
+      } catch (err) {
+        console.error(err);
+        errorDiv.innerText = "❌ Error de conexión con el servidor.";
       }
     });
   </script>
