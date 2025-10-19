@@ -3,210 +3,312 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel Admin | Mi Store</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <title>Panel de Administración - Mi Store</title>
+
   <style>
-    body {
-      background-color: #f5f7fa;
-      font-family: "Poppins", sans-serif;
+    /* =============== RESETEO =============== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    header {
-      background: #007bff;
+
+    body {
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background: #f4f6fb;
+      color: #333;
+      overflow-x: hidden;
+      min-height: 100vh;
+      transition: background 0.6s ease;
+    }
+
+    /* =============== PANTALLA DE CARGA =============== */
+    .splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #007bff, #00c6ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeOut 1s ease forwards;
+      animation-delay: 2.8s;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .splash-logo {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: #007bff;
+      font-weight: bold;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+      animation: logoPop 1.3s ease forwards;
+    }
+
+    @keyframes logoPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    .splash-text {
       color: white;
-      padding: 1rem;
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      animation: fadeInText 2s ease-in;
+    }
+
+    @keyframes fadeInText {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* =============== ANIMACIÓN DE BURBUJAS FONDO =============== */
+    .bubble {
+      position: absolute;
+      bottom: -150px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      animation: rise 10s infinite ease-in;
+      z-index: -1;
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+    }
+
+    /* =============== PANEL ADMIN =============== */
+    .admin-panel {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: showPanel 1s ease forwards;
+      animation-delay: 3.1s;
+      padding: 2rem;
+    }
+
+    @keyframes showPanel {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
     }
+
     header h1 {
-      font-size: 1.5rem;
+      color: #007bff;
+      font-weight: 600;
+      font-size: 1.6rem;
     }
-    .container {
+
+    .logout-btn {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .logout-btn:hover {
+      background: #e84118;
+      transform: scale(1.05);
+    }
+
+    main {
       margin-top: 2rem;
-      max-width: 900px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.8rem;
+      transition: all 0.5s ease;
     }
-    .app-card {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+
+    .card {
       background: white;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 1.7rem;
+      border-radius: 1rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
     }
-    .app-card img {
-      width: 100%;
-      border-radius: 8px;
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
+
+    .card h3 {
+      color: #007bff;
+      margin-bottom: 0.8rem;
+      font-weight: 600;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    .action {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .action:hover {
+      background: #0056b3;
+      transform: scale(1.05);
+    }
+
     footer {
       text-align: center;
-      padding: 1rem;
       margin-top: 2rem;
-      color: #666;
+      color: #777;
+      font-size: 0.9rem;
     }
+
+    /* =============== TRANSICIÓN ENTRE PÁGINAS =============== */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 2000;
+      transform: translateY(100%);
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .page-transition.active {
+      transform: translateY(0);
+    }
+
+    .transition-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.4rem;
+      color: #007bff;
+      font-weight: 600;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
     @media (max-width: 600px) {
       header h1 {
         font-size: 1.2rem;
+      }
+      main {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Panel de Administración</h1>
-    <a href="/" class="btn btn-light btn-sm">🌐 Ver Tienda</a>
-  </header>
+  <!-- 🌈 Fondo animado -->
+  <div class="bubble" style="left: 10%; width: 60px; height: 60px; animation-delay: 0s;"></div>
+  <div class="bubble" style="left: 30%; width: 40px; height: 40px; animation-delay: 2s;"></div>
+  <div class="bubble" style="left: 50%; width: 80px; height: 80px; animation-delay: 4s;"></div>
+  <div class="bubble" style="left: 70%; width: 50px; height: 50px; animation-delay: 6s;"></div>
+  <div class="bubble" style="left: 90%; width: 70px; height: 70px; animation-delay: 8s;"></div>
 
-  <div class="container">
-    <h3 class="mb-3">Agregar Nueva App</h3>
-
-    <form id="appForm" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="name" class="form-label">Nombre de la app</label>
-        <input
-          type="text"
-          class="form-control"
-          id="name"
-          name="name"
-          required
-        />
-      </div>
-
-      <div class="mb-3">
-        <label for="description" class="form-label">Descripción</label>
-        <textarea
-          class="form-control"
-          id="description"
-          name="description"
-          rows="3"
-        ></textarea>
-      </div>
-
-      <div class="mb-3">
-        <label for="imageFile" class="form-label">Imagen (PNG/JPG)</label>
-        <input
-          type="file"
-          class="form-control"
-          id="imageFile"
-          name="image"
-          accept="image/*"
-          required
-        />
-      </div>
-
-      <div class="mb-3">
-        <label for="apkFile" class="form-label">Archivo APK (opcional)</label>
-        <input
-          type="file"
-          class="form-control"
-          id="apkFile"
-          name="file"
-          accept=".apk,.zip"
-        />
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100">
-        🚀 Agregar App
-      </button>
-    </form>
-
-    <hr class="my-4" />
-
-    <h3 class="mb-3">📱 Aplicaciones Publicadas</h3>
-    <div id="appsList"></div>
+  <!-- 🌀 Splash screen -->
+  <div class="splash-screen">
+    <div class="splash-logo">🛍️</div>
+    <div class="splash-text">Cargando panel de administración...</div>
   </div>
 
-  <footer>
-    <p>© 2025 Mi Store - Panel de Administración</p>
-  </footer>
+  <!-- ⚡ Transición entre páginas -->
+  <div class="page-transition" id="pageTransition">
+    <div class="transition-text">Cargando...</div>
+  </div>
+
+  <!-- 🧩 Panel admin -->
+  <div class="admin-panel">
+    <header>
+      <h1>Panel de Administración - Mi Store</h1>
+      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </header>
+
+    <main>
+      <div class="card" onclick="goTo('upload.html')">
+        <h3>📦 Subir nueva app</h3>
+        <p>Agrega una nueva aplicación a la tienda virtual.</p>
+        <button class="action">Subir App</button>
+      </div>
+
+      <div class="card" onclick="goTo('/')">
+        <h3>🛒 Ver tienda</h3>
+        <p>Visualiza cómo se muestran las apps al público.</p>
+        <button class="action">Ir a la tienda</button>
+      </div>
+
+      <div class="card" onclick="alert('🛠️ Esta función estará disponible pronto.')">
+        <h3>👥 Gestionar usuarios</h3>
+        <p>Administra los usuarios registrados y sus permisos.</p>
+        <button class="action">Ver usuarios</button>
+      </div>
+    </main>
+
+    <footer>
+      © 2025 Mi Store — Panel de control
+    </footer>
+  </div>
 
   <script>
-    // Cargar apps al iniciar
-    document.addEventListener("DOMContentLoaded", loadApps);
+    // 🔹 Transición entre páginas (efecto moderno)
+    const transition = document.getElementById("pageTransition");
 
-    // Enviar formulario
-    document.getElementById("appForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    function goTo(url) {
+      transition.classList.add("active");
+      setTimeout(() => (window.location.href = url), 700);
+    }
 
-      const name = document.getElementById("name").value;
-      const description = document.getElementById("description").value;
-      const imageFile = document.getElementById("imageFile").files[0];
-      const apkFile = document.getElementById("apkFile").files[0];
-
-      if (!imageFile) {
-        alert("Por favor, selecciona una imagen.");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("image", imageFile);
-      if (apkFile) formData.append("file", apkFile);
-
-      try {
-        const res = await fetch("/upload-app", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          alert(data.message || "✅ App agregada correctamente");
-          e.target.reset();
-          loadApps();
-        } else {
-          alert("❌ Error al subir la app");
-          console.error(data);
-        }
-      } catch (error) {
-        console.error("Error al subir la app:", error);
-        alert("❌ Error al conectar con el servidor");
-      }
-    });
-
-    // Cargar apps
-    async function loadApps() {
-      try {
-        const res = await fetch("/api/apps");
-        const apps = await res.json();
-
-        const container = document.getElementById("appsList");
-        container.innerHTML = "";
-
-        if (apps.length === 0) {
-          container.innerHTML =
-            "<p class='text-muted'>Aún no hay aplicaciones publicadas.</p>";
-          return;
-        }
-
-        apps.forEach((app) => {
-          const card = document.createElement("div");
-          card.className = "app-card row align-items-center";
-
-          card.innerHTML = `
-            <div class="col-md-3">
-              <img src="${app.image_url}" alt="${app.name}" />
-            </div>
-            <div class="col-md-6">
-              <h5>${app.name}</h5>
-              <p>${app.description || ""}</p>
-            </div>
-            <div class="col-md-3 text-end">
-              ${
-                app.file_url
-                  ? `<a href="${app.file_url}" class="btn btn-success btn-sm" target="_blank">⬇️ Descargar</a>`
-                  : `<button class="btn btn-secondary btn-sm" disabled>Sin APK</button>`
-              }
-            </div>
-          `;
-          container.appendChild(card);
-        });
-      } catch (error) {
-        console.error("Error cargando apps:", error);
+    // 🔹 Cerrar sesión
+    function logout() {
+      if (confirm("¿Deseas cerrar sesión?")) {
+        transition.classList.add("active");
+        fetch("/logout", { method: "POST" })
+          .then(() => setTimeout(() => (window.location.href = "/login.html"), 700))
+          .catch(() => alert("Error al cerrar sesión."));
       }
     }
   </script>
