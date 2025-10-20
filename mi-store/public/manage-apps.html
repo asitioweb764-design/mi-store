@@ -6,6 +6,89 @@
   <title>Gestionar aplicaciones - My Store</title>
   <link rel="stylesheet" href="styles-admin.css" />
   <style>
+    :root {
+      --primary: #007bff;
+      --danger: #ff4757;
+      --danger-hover: #e84118;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    .admin-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 1rem 2rem;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      gap: 1rem;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .header-logo {
+      height: 40px;
+    }
+
+    .header-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .logout-btn,
+    .back-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn:hover,
+    .back-btn:hover {
+      background: #0056b3;
+    }
+
+    section {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      flex: 1;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: left;
+    }
+
     .apps-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -20,6 +103,9 @@
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .app-card:hover {
@@ -36,8 +122,9 @@
     }
 
     .app-card h3 {
-      color: #007bff;
+      color: var(--primary);
       margin-bottom: 0.4rem;
+      font-size: 1.1rem;
     }
 
     .app-card p {
@@ -47,32 +134,49 @@
     }
 
     .delete-btn {
-      background: #ff4757;
+      background: var(--danger);
       border: none;
       color: white;
       padding: 0.4rem 0.8rem;
       border-radius: 0.4rem;
       cursor: pointer;
       transition: background 0.3s ease;
+      font-size: 0.9rem;
+      align-self: flex-start;
     }
 
     .delete-btn:hover {
-      background: #e84118;
+      background: var(--danger-hover);
     }
 
-    .back-btn {
-      margin-top: 1rem;
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
 
-    .back-btn:hover {
-      background: #0056b3;
+      .logo-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-buttons {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .logout-btn,
+      .back-btn {
+        width: auto;
+      }
+
+      .app-card img {
+        height: 140px;
+      }
+
+      h2 {
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -83,13 +187,15 @@
         <img src="logo.png" alt="My Store Logo" class="header-logo" />
         <h1>Gestionar Aplicaciones</h1>
       </div>
-      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+      <div class="header-buttons">
+        <button class="back-btn" onclick="goBack()">← Volver al Panel</button>
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+      </div>
     </header>
 
     <section>
       <h2>📋 Aplicaciones publicadas</h2>
       <div id="appsContainer" class="apps-grid">Cargando apps...</div>
-      <button class="back-btn" onclick="goBack()">← Volver al Panel</button>
     </section>
   </div>
 
