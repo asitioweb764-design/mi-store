@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestionar aplicaciones - My Store</title>
   <link rel="stylesheet" href="styles-admin.css" />
-  <style>
+  
+    <style>
     /* 1. Estilos para la Cuadrícula Compacta */
     .apps-grid {
       display: grid;
@@ -15,12 +16,12 @@
       margin-top: 2rem;
     }
 
+    /* Estilos de la tarjeta de aplicación */
     .app-card {
       background: white;
       border-radius: 1rem;
       padding: 1rem;
-      /* Hacemos que la tarjeta no se extienda si solo hay una */
-      width: 100%; 
+      width: 100%; /* Asegura que ocupe el espacio de la cuadrícula */
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
@@ -89,12 +90,17 @@
       align-items: center;
       gap: 10px;
     }
+    
+    .header-logo {
+      /* Ajusta el tamaño de tu logo si es necesario */
+      height: 40px; 
+    }
 
     .header-buttons {
       display: flex;
       gap: 10px; /* Espacio entre botones */
       align-items: center;
-    }
+  S }
 
     /* Estilo para el botón de la cabecera "Volver al Panel" */
     .back-to-panel-btn {
@@ -105,11 +111,12 @@
       border-radius: 0.5rem;
       cursor: pointer;
       transition: background 0.3s ease;
+      font-size: 0.9rem; /* Asegura tamaño de fuente consistente */
     }
 
     .back-to-panel-btn:hover {
       background: #0056b3;
-    }
+  S }
     
     .logout-btn {
       /* Estilos del botón rojo "Cerrar sesión" */
@@ -120,16 +127,18 @@
       border-radius: 0.5rem;
       cursor: pointer;
       transition: background 0.3s ease;
+      font-size: 0.9rem; /* Asegura tamaño de fuente consistente */
     }
     
     .logout-btn:hover {
       background: #e84118;
     }
   </style>
-</head>
+  </head>
+
 <body>
   <div class="admin-panel">
-    <header>
+        <header>
       <div class="logo-section">
         <img src="logo.png" alt="My Store Logo" class="header-logo" />
         <h1>Gestionar Aplicaciones</h1>
@@ -139,15 +148,15 @@
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
       </div>
     </header>
-
-    <section>
+        <section>
       <h2>📋 Aplicaciones publicadas</h2>
+      
             <div id="appsContainer" class="apps-grid">Cargando apps...</div> 
       
           </section>
   </div>
 
-  <script>
+    <script>
     async function loadApps() {
       try {
         const res = await fetch("/api/apps");
@@ -156,13 +165,13 @@
         container.innerHTML = "";
 
         if (apps.length === 0) {
-          container.innerHTML = "<p>No hay aplicaciones publicadas todavía.</p>";
+  S         container.innerHTML = "<p>No hay aplicaciones publicadas todavía.</p>";
           return;
         }
 
         apps.forEach((app) => {
           const card = document.createElement("div");
-          // Asegura que se añade la clase 'app-card'
+          // ¡IMPORTANTE! Se añade la clase 'app-card'
           card.classList.add("app-card"); 
           card.innerHTML = `
             <img src="/uploads/${app.image}" alt="${app.name}" />
@@ -177,7 +186,6 @@
       }
     }
 
-    // ... El resto de tus funciones JS (deleteApp, goBack, logout)
     async function deleteApp(id) {
       if (!confirm("¿Seguro que quieres eliminar esta aplicación?")) return;
       try {
@@ -205,5 +213,5 @@
     // Cargar automáticamente las apps al entrar
     window.addEventListener("load", loadApps);
   </script>
-</body>
+  </body>
 </html>
