@@ -3,90 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel de Administración - My Store</title>
-  <link rel="stylesheet" href="styles-admin.css" />
-</head>
-<body>
-  <!-- 🌈 Fondo animado de burbujas -->
-  <div class="bubble" style="left: 10%; width: 60px; height: 60px; animation-delay: 0s;"></div>
-  <div class="bubble" style="left: 30%; width: 40px; height: 40px; animation-delay: 2s;"></div>
-  <div class="bubble" style="left: 50%; width: 80px; height: 80px; animation-delay: 4s;"></div>
-  <div class="bubble" style="left: 70%; width: 50px; height: 50px; animation-delay: 6s;"></div>
-  <div class="bubble" style="left: 90%; width: 70px; height: 70px; animation-delay: 8s;"></div>
+  <title>Panel de Administración - Mi Store</title>
 
-  <!-- 🌀 Splash screen -->
-  <div class="splash-screen">
-    <img src="logo.png" alt="My Store Logo" class="splash-logo" />
-    <div class="splash-text">Cargando panel de administración...</div>
-  </div>
-
-  <!-- ⚡ Transición entre páginas -->
-  <div class="page-transition" id="pageTransition">
-    <div class="transition-text">Cargando...</div>
-  </div>
-
-  <!-- 🧩 Panel admin -->
-  <div class="admin-panel">
-    <header>
-      <div class="logo-section">
-        <img src="logo.png" alt="My Store Logo" class="header-logo" />
-        <h1>Panel de Administración - My Store</h1>
-      </div>
-      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-    </header>
-
-    <main>
-      <div class="card" onclick="goTo('upload.html')">
-        <h3>📦 Subir nueva app</h3>
-        <p>Agrega una nueva aplicación a la tienda virtual.</p>
-        <button class="action">Subir App</button>
-      </div>
-
-      <div class="card" onclick="goTo('/')">
-        <h3>🛒 Ver tienda</h3>
-        <p>Visualiza cómo se muestran las apps al público.</p>
-        <button class="action">Ir a la tienda</button>
-      </div>
-
-  <div class="card" onclick="goTo('manage-apps.html')">
-    <h3>🗂️ Gestionar aplicaciones</h3>
-    <p>Visualiza, edita o elimina las apps publicadas en la tienda.</p>
-    <button class="action">Administrar Apps</button>
-  </div>
-</main>
-
-      <div class="card" onclick="alert('🛠️ Próximamente podrás gestionar usuarios y permisos.')">
-        <h3>👥 Gestionar usuarios</h3>
-        <p>Administra los usuarios registrados en la plataforma.</p>
-        <button class="action">Ver usuarios</button>
-      </div>
-    </main>
-
-    <footer>
-      © 2025 My Store — Panel de control
-    </footer>
-  </div>
-
-  <script>
-    // 🔹 Transición entre páginas
-    const transition = document.getElementById("pageTransition");
-
-    function goTo(url) {
-      transition.classList.add("active");
-      setTimeout(() => (window.location.href = url), 700);
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0a0f24, #001a33);
+      overflow-x: hidden;
+      color: white;
     }
 
-    // 🔹 Cerrar sesión
+    /* Fondo animado de burbujas */
+    .bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .bubble {
+      position: absolute;
+      bottom: -150px;
+      background: radial-gradient(circle at 30% 30%, #00c3ff, #0066ff);
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: rise 15s infinite ease-in;
+    }
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateY(-1200px) scale(1.3);
+        opacity: 0;
+      }
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      z-index: 2;
+      backdrop-filter: blur(6px);
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    header img {
+      height: 35px;
+      width: auto;
+      border-radius: 6px;
+    }
+
+    header button {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      margin-left: 10px;
+    }
+    header button:hover {
+      background: #ff6b81;
+      transform: scale(1.05);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      margin-top: 100px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      width: 280px;
+      height: 160px;
+      border-radius: 1rem;
+      text-align: center;
+      padding: 1.2rem;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 25px rgba(0, 195, 255, 0.3);
+    }
+
+    .card h2 {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #00c3ff;
+    }
+
+    footer {
+      text-align: center;
+      color: #bbb;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        width: 90%;
+        height: 150px;
+      }
+      header h1 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bubbles">
+    <div class="bubble" style="left: 10%; width: 40px; height: 40px; animation-duration: 13s;"></div>
+    <div class="bubble" style="left: 25%; width: 60px; height: 60px; animation-duration: 18s;"></div>
+    <div class="bubble" style="left: 50%; width: 25px; height: 25px; animation-duration: 10s;"></div>
+    <div class="bubble" style="left: 70%; width: 80px; height: 80px; animation-duration: 16s;"></div>
+    <div class="bubble" style="left: 85%; width: 50px; height: 50px; animation-duration: 14s;"></div>
+  </div>
+
+  <header>
+    <h1>
+      <img src="logo.png" alt="Mi Store" />
+      Panel de Administración
+    </h1>
+    <div>
+      <button onclick="window.location.href='index.html'">Ver tienda</button>
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="card" onclick="location.href='add-app.html'">
+      <h2>📱 Agregar nueva app</h2>
+    </div>
+    <div class="card" onclick="location.href='manage-apps.html'">
+      <h2>🗂️ Administrar apps</h2>
+    </div>
+    <div class="card" onclick="location.href='manage-users.html'">
+      <h2>👥 Gestionar usuarios</h2>
+    </div>
+  </main>
+
+  <footer>© 2025 Mi Store. Todos los derechos reservados.</footer>
+
+  <script>
     function logout() {
-      if (confirm("¿Deseas cerrar sesión?")) {
-        transition.classList.add("active");
-        fetch("/logout", { method: "POST" })
-          .then(() => setTimeout(() => (window.location.href = "/login.html"), 700))
-          .catch(() => alert("Error al cerrar sesión."));
+      if (confirm("¿Seguro que deseas cerrar sesión?")) {
+        window.location.href = "/login.html";
       }
     }
   </script>
 </body>
 </html>
-
-
