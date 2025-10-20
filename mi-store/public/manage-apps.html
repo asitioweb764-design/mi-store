@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestionar aplicaciones - My Store</title>
+  <link rel="stylesheet" href="styles-admin.css" />
+  <style>
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .app-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+
+    .app-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .app-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .app-card h3 {
+      color: #007bff;
+      margin-bottom: 0.4rem;
+    }
+
+    .app-card p {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 0.8rem;
+    }
+
+    .delete-btn {
+      background: #ff4757;
+      border: none;
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      background: #e84118;
+    }
+
+    .back-btn {
+      margin-top: 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-panel">
+    <header>
+      <div class="logo-section">
+        <img src="logo.png" alt="My Store Logo" class="header-logo" />
+        <h1>Gestionar Aplicaciones</h1>
+      </div>
+      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </header>
+
+    <section>
+      <h2>📋 Aplicaciones publicadas</h2>
+      <div id="appsContainer" class="apps-grid">Cargando apps...</div>
+      <button class="back-btn" onclick="goBack()">← Volver al Panel</button>
+    </section>
+  </div>
+
+  <script>
+    async function loadApps() {
+      try {
+        const res = await fetch("/api/apps");
+        const apps = await res.json();
+        const container = document.getElementById("appsContainer");
+        container.innerHTML = "";
+
+        if (apps.length === 0) {
+          container.innerHTML = "<p>No hay aplicaciones publicadas todavía.</p>";
+          return;
+        }
+
+        apps.forEach((app) => {
+          const card = document.createElement("div");
+          card.classList.add("app-card");
+          card.innerHTML = `
+            <img src="/uploads/${app.image}" alt="${app.name}" />
+            <h3>${app.name}</h3>
+            <p>${app.description}</p>
+            <button class="delete-btn" onclick="deleteApp(${app.id})">🗑️ Eliminar</button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error cargando apps:", error);
+      }
+    }
+
+    async function deleteApp(id) {
+      if (!confirm("¿Seguro que quieres eliminar esta aplicación?")) return;
+      try {
+        const res = await fetch(`/apps/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message);
+        loadApps();
+      } catch (error) {
+        alert("Error al eliminar la aplicación.");
+      }
+    }
+
+    function goBack() {
+      window.location.href = "admin.html";
+    }
+
+    function logout() {
+      if (confirm("¿Deseas cerrar sesión?")) {
+        fetch("/logout", { method: "POST" })
+          .then(() => (window.location.href = "/login.html"))
+          .catch(() => alert("Error al cerrar sesión."));
+      }
+    }
+
+    // Cargar automáticamente las apps al entrar
+    window.addEventListener("load", loadApps);
+  </script>
+</body>
+</html>
