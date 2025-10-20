@@ -195,6 +195,38 @@ app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (
   }
 });
 
+// ================================
+// 🗑️ ELIMINAR APLICACIONES
+// ================================
+app.delete("/apps/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar si la app existe
+    const appData = await db.query("SELECT * FROM apps WHERE id = $1", [id]);
+    if (appData.rows.length === 0) {
+      return res.status(404).json({ message: "App no encontrada" });
+    }
+
+    // Eliminar los archivos físicos (imagen y apk)
+    const { image, apk } = appData.rows[0];
+    const imagePath = `./uploads/${image}`;
+    const apkPath = `./uploads/${apk}`;
+
+    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+    if (fs.existsSync(apkPath)) fs.unlinkSync(apkPath);
+
+    // Eliminar de la base de datos
+    await db.query("DELETE FROM apps WHERE id = $1", [id]);
+
+    console.log(`🗑️ App con ID ${id} eliminada correctamente.`);
+    res.json({ message: "App eliminada correctamente" });
+  } catch (error) {
+    console.error("❌ Error al eliminar app:", error);
+    res.status(500).json({ message: "Error al eliminar app", error: error.message });
+  }
+});
+
 
 // ================================
 // ⚙️ CONFIGURACIÓN DEL SERVIDOR
@@ -203,4 +235,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
 
