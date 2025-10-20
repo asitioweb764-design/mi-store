@@ -3,247 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel de Administración - Mi Store</title>
-
-  <style>
-    /* =============== RESETEO =============== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: "Poppins", "Segoe UI", sans-serif;
-      background: #f4f6fb;
-      color: #333;
-      overflow-x: hidden;
-      min-height: 100vh;
-      transition: background 0.6s ease;
-    }
-
-    /* =============== PANTALLA DE CARGA =============== */
-    .splash-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #007bff, #00c6ff);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      animation: fadeOut 1s ease forwards;
-      animation-delay: 2.8s;
-    }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
-
-    .splash-logo {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: #007bff;
-      font-weight: bold;
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-      animation: logoPop 1.3s ease forwards;
-    }
-
-    @keyframes logoPop {
-      0% { transform: scale(0.5); opacity: 0; }
-      60% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-
-    .splash-text {
-      color: white;
-      margin-top: 1.5rem;
-      font-size: 1.2rem;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      animation: fadeInText 2s ease-in;
-    }
-
-    @keyframes fadeInText {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* =============== ANIMACIÓN DE BURBUJAS FONDO =============== */
-    .bubble {
-      position: absolute;
-      bottom: -150px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      animation: rise 10s infinite ease-in;
-      z-index: -1;
-    }
-
-    @keyframes rise {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
-    }
-
-    /* =============== PANEL ADMIN =============== */
-    .admin-panel {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: showPanel 1s ease forwards;
-      animation-delay: 3.1s;
-      padding: 2rem;
-    }
-
-    @keyframes showPanel {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    header h1 {
-      color: #007bff;
-      font-weight: 600;
-      font-size: 1.6rem;
-    }
-
-    .logout-btn {
-      background: #ff4757;
-      border: none;
-      color: white;
-      padding: 0.6rem 1.2rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-
-    .logout-btn:hover {
-      background: #e84118;
-      transform: scale(1.05);
-    }
-
-    main {
-      margin-top: 2rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.8rem;
-      transition: all 0.5s ease;
-    }
-
-    .card {
-      background: white;
-      padding: 1.7rem;
-      border-radius: 1rem;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      cursor: pointer;
-    }
-
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .card h3 {
-      color: #007bff;
-      margin-bottom: 0.8rem;
-      font-weight: 600;
-    }
-
-    .card p {
-      font-size: 0.95rem;
-      margin-bottom: 1rem;
-      color: #555;
-    }
-
-    .action {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.7rem 1.2rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-
-    .action:hover {
-      background: #0056b3;
-      transform: scale(1.05);
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      color: #777;
-      font-size: 0.9rem;
-    }
-
-    /* =============== TRANSICIÓN ENTRE PÁGINAS =============== */
-    .page-transition {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 2000;
-      transform: translateY(100%);
-      transition: transform 0.6s ease-in-out;
-    }
-
-    .page-transition.active {
-      transform: translateY(0);
-    }
-
-    .transition-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.4rem;
-      color: #007bff;
-      font-weight: 600;
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 1.2rem;
-      }
-      main {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <title>Panel de Administración - My Store</title>
+  <link rel="stylesheet" href="styles-admin.css" />
 </head>
 <body>
-  <!-- 🌈 Fondo animado -->
+  <!-- 🌈 Fondo animado de burbujas -->
   <div class="bubble" style="left: 10%; width: 60px; height: 60px; animation-delay: 0s;"></div>
   <div class="bubble" style="left: 30%; width: 40px; height: 40px; animation-delay: 2s;"></div>
   <div class="bubble" style="left: 50%; width: 80px; height: 80px; animation-delay: 4s;"></div>
@@ -252,7 +16,7 @@
 
   <!-- 🌀 Splash screen -->
   <div class="splash-screen">
-    <div class="splash-logo">🛍️</div>
+    <img src="logo.png" alt="My Store Logo" class="splash-logo" />
     <div class="splash-text">Cargando panel de administración...</div>
   </div>
 
@@ -264,7 +28,10 @@
   <!-- 🧩 Panel admin -->
   <div class="admin-panel">
     <header>
-      <h1>Panel de Administración - Mi Store</h1>
+      <div class="logo-section">
+        <img src="logo.png" alt="My Store Logo" class="header-logo" />
+        <h1>Panel de Administración - My Store</h1>
+      </div>
       <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
     </header>
 
@@ -281,20 +48,20 @@
         <button class="action">Ir a la tienda</button>
       </div>
 
-      <div class="card" onclick="alert('🛠️ Esta función estará disponible pronto.')">
+      <div class="card" onclick="alert('🛠️ Próximamente podrás gestionar usuarios y permisos.')">
         <h3>👥 Gestionar usuarios</h3>
-        <p>Administra los usuarios registrados y sus permisos.</p>
+        <p>Administra los usuarios registrados en la plataforma.</p>
         <button class="action">Ver usuarios</button>
       </div>
     </main>
 
     <footer>
-      © 2025 Mi Store — Panel de control
+      © 2025 My Store — Panel de control
     </footer>
   </div>
 
   <script>
-    // 🔹 Transición entre páginas (efecto moderno)
+    // 🔹 Transición entre páginas
     const transition = document.getElementById("pageTransition");
 
     function goTo(url) {
