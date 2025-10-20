@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir nueva app - My Store</title>
+  <link rel="stylesheet" href="styles-upload.css" />
+</head>
+<body>
+  <!-- 🌈 Fondo animado -->
+  <div class="bubble" style="left: 10%; width: 60px; height: 60px; animation-delay: 0s;"></div>
+  <div class="bubble" style="left: 30%; width: 40px; height: 40px; animation-delay: 2s;"></div>
+  <div class="bubble" style="left: 50%; width: 80px; height: 80px; animation-delay: 4s;"></div>
+  <div class="bubble" style="left: 70%; width: 50px; height: 50px; animation-delay: 6s;"></div>
+  <div class="bubble" style="left: 90%; width: 70px; height: 70px; animation-delay: 8s;"></div>
 
+  <!-- 🌀 Splash screen -->
+  <div class="splash-screen">
+    <img src="logo.png" alt="My Store Logo" class="splash-logo" />
+    <div class="splash-text">Preparando formulario...</div>
+  </div>
+
+  <!-- ⚙️ Página principal -->
+  <div class="upload-container">
+    <header>
+      <div class="header-content">
+        <img src="logo.png" alt="My Store Logo" class="header-logo" />
+        <h1>Subir nueva app</h1>
+      </div>
+      <button class="back-btn" onclick="goBack()">← Volver al Panel</button>
+    </header>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="name">Nombre de la app</label>
+      <input type="text" id="name" name="name" placeholder="Ejemplo: Calculadora Pro" required />
+
+      <label for="description">Descripción</label>
+      <textarea id="description" name="description" placeholder="Describe brevemente la aplicación..." rows="4" required></textarea>
+
+      <label for="image">Imagen de la app (JPG o PNG)</label>
+      <input type="file" id="image" name="image" accept="image/*" required />
+
+      <label for="apk">Archivo APK</label>
+      <input type="file" id="apk" name="apk" accept=".apk" required />
+
+      <button type="submit" id="uploadBtn">🚀 Subir aplicación</button>
+
+      <div class="progress">
+        <div id="progressBar"></div>
+      </div>
+
+      <div id="statusMessage"></div>
+    </form>
+  </div>
+
+  <script>
+    // Efecto de volver
+    function goBack() {
+      document.body.classList.add("page-transition");
+      setTimeout(() => (window.location.href = "admin.html"), 700);
+    }
+
+    // Subir app con progreso
+    const form = document.getElementById("uploadForm");
+    const progressBar = document.getElementById("progressBar");
+    const statusMessage = document.getElementById("statusMessage");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      progressBar.style.width = "0%";
+      statusMessage.innerHTML = "";
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload", true);
+
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          progressBar.style.width = percent + "%";
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          statusMessage.innerHTML = "✅ Aplicación subida con éxito.";
+          statusMessage.className = "success";
+          form.reset();
+          progressBar.style.width = "100%";
+        } else {
+          statusMessage.innerHTML = "❌ Error al subir la aplicación.";
+          statusMessage.className = "error";
+        }
+      };
+
+      xhr.onerror = function () {
+        statusMessage.innerHTML = "⚠️ Error de conexión.";
+        statusMessage.className = "error";
+      };
+
+      xhr.send(formData);
+    });
+  </script>
+</body>
+</html>
