@@ -133,9 +133,74 @@ app.get("/check-admin", async (req, res) => {
 });
 
 // ================================
+// 🚀 SUBIDA DE APPS (IMAGEN + APK)
+// ================================
+import multer from "multer";
+import fs from "fs";
+import path from "path";
+
+// Crear carpeta para guardar archivos si no existe
+const uploadDir = "./uploads";
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+// Configurar Multer para subir imágenes y APKs
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname.replace(/\s+/g, "_");
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 15 * 1024 * 1024 }, // máximo 15MB
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype.startsWith("image/") ||
+      file.mimetype === "application/vnd.android.package-archive"
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Tipo de archivo no permitido"));
+    }
+  },
+});
+
+// 📦 Ruta para subir app
+app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const imageFile = req.files["image"] ? req.files["image"][0].filename : null;
+    const apkFile = req.files["apk"] ? req.files["apk"][0].filename : null;
+
+    if (!name || !description || !imageFile || !apkFile) {
+      return res.status(400).json({ message: "Faltan campos o archivos" });
+    }
+
+    // Guardar en base de datos
+    await db.query(
+      `INSERT INTO apps (name, description, image, apk, created_at)
+       VALUES ($1, $2, $3, $4, NOW())`,
+      [name, description, imageFile, apkFile]
+    );
+
+    console.log(`✅ App '${name}' subida correctamente.`);
+    res.json({ message: "App subida con éxito" });
+  } catch (error) {
+    console.error("❌ Error al subir app:", error);
+    res.status(500).json({ message: "Error al subir aplicación", error: error.message });
+  }
+});
+
+
+// ================================
 // ⚙️ CONFIGURACIÓN DEL SERVIDOR
 // ================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
