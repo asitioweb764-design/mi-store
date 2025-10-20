@@ -196,6 +196,20 @@ app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (
 });
 
 // ================================
+// 📋 LISTAR APPS (para el admin)
+// ================================
+app.get("/api/apps", async (req, res) => {
+  try {
+    const result = await db.query("SELECT * FROM apps ORDER BY created_at DESC");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error al obtener apps:", error);
+    res.status(500).json({ message: "Error al obtener apps" });
+  }
+});
+
+
+// ================================
 // 🗑️ ELIMINAR APLICACIONES
 // ================================
 app.delete("/apps/:id", async (req, res) => {
@@ -235,5 +249,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
 
 
