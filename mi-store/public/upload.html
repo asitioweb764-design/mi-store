@@ -100,16 +100,7 @@
       };
 
       xhr.send(formData);
-    });
-
-try {
-  const result = await cloudinary.uploader.upload(filePath, { folder: "mi-store/apps" });
-  console.log("Subida a Cloudinary exitosa:", result);
-} catch (error) {
-  console.error("Error subiendo a Cloudinary:", error);
-}
-
-    
+    });  
   </script>
 </body>
 </html>
