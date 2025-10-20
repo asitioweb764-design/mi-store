@@ -39,25 +39,21 @@
       <div class="card" onclick="goTo('upload.html')">
         <h3>📦 Subir nueva app</h3>
         <p>Agrega una nueva aplicación a la tienda virtual.</p>
-        <button class="action">Subir App</button>
       </div>
 
       <div class="card" onclick="goTo('/')">
         <h3>🛒 Ver tienda</h3>
         <p>Visualiza cómo se muestran las apps al público.</p>
-        <button class="action">Ir a la tienda</button>
       </div>
 
       <div class="card" onclick="goTo('manage-apps.html')">
         <h3>🗂️ Gestionar aplicaciones</h3>
         <p>Visualiza, edita o elimina las apps publicadas en la tienda.</p>
-        <button class="action">Administrar Apps</button>
       </div>
 
       <div class="card" onclick="alert('🛠️ Próximamente podrás gestionar usuarios y permisos.')">
         <h3>👥 Gestionar usuarios</h3>
         <p>Administra los usuarios registrados en la plataforma.</p>
-        <button class="action">Ver usuarios</button>
       </div>
     </main>
 
@@ -67,7 +63,6 @@
   </div>
 
   <script>
-    // 🔹 Transición entre páginas
     const transition = document.getElementById("pageTransition");
 
     function goTo(url) {
@@ -75,7 +70,6 @@
       setTimeout(() => (window.location.href = url), 700);
     }
 
-    // 🔹 Cerrar sesión
     function logout() {
       if (confirm("¿Deseas cerrar sesión?")) {
         transition.classList.add("active");
