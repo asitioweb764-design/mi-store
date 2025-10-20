@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel de Administración - Mi Store</title>
-
   <style>
     body {
       margin: 0;
@@ -14,7 +13,7 @@
       color: white;
     }
 
-    /* Fondo animado de burbujas */
+    /* Fondo animado */
     .bubbles {
       position: fixed;
       top: 0;
@@ -33,14 +32,8 @@
       animation: rise 15s infinite ease-in;
     }
     @keyframes rise {
-      0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.4;
-      }
-      100% {
-        transform: translateY(-1200px) scale(1.3);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(1); opacity: 0.4; }
+      100% { transform: translateY(-1200px) scale(1.3); opacity: 0; }
     }
 
     header {
@@ -108,6 +101,9 @@
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
       transition: transform 0.3s, box-shadow 0.3s;
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .card:hover {
@@ -129,13 +125,8 @@
     }
 
     @media (max-width: 600px) {
-      .card {
-        width: 90%;
-        height: 150px;
-      }
-      header h1 {
-        font-size: 1rem;
-      }
+      .card { width: 90%; height: 150px; }
+      header h1 { font-size: 1rem; }
     }
   </style>
 </head>
@@ -149,10 +140,7 @@
   </div>
 
   <header>
-    <h1>
-      <img src="logo.png" alt="Mi Store" />
-      Panel de Administración
-    </h1>
+    <h1><img src="logo.png" alt="Mi Store" /> Panel de Administración</h1>
     <div>
       <button onclick="window.location.href='index.html'">Ver tienda</button>
       <button onclick="logout()">Cerrar sesión</button>
@@ -160,15 +148,9 @@
   </header>
 
   <main>
-    <div class="card" onclick="location.href='add-app.html'">
-      <h2>📱 Agregar nueva app</h2>
-    </div>
-    <div class="card" onclick="location.href='manage-apps.html'">
-      <h2>🗂️ Administrar apps</h2>
-    </div>
-    <div class="card" onclick="location.href='manage-users.html'">
-      <h2>👥 Gestionar usuarios</h2>
-    </div>
+    <div class="card" onclick="location.href='add-app.html'"><h2>📱 Agregar nueva app</h2></div>
+    <div class="card" onclick="location.href='manage-apps.html'"><h2>🗂️ Administrar apps</h2></div>
+    <div class="card" onclick="location.href='manage-users.html'"><h2>👥 Gestionar usuarios</h2></div>
   </main>
 
   <footer>© 2025 Mi Store. Todos los derechos reservados.</footer>
