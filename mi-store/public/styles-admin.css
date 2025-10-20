@@ -47,10 +47,7 @@ body {
 }
 
 @keyframes fadeOut {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
+  to { opacity: 0; visibility: hidden; }
 }
 
 .splash-logo {
@@ -172,7 +169,8 @@ main.cards-container {
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Botón siempre abajo */
+  justify-content: space-between; /* Distribuye contenido uniformemente */
+  min-height: 180px; /* Ajusta según tu contenido */
 }
 
 .card::before {
@@ -203,24 +201,8 @@ main.cards-container {
 
 .card p {
   font-size: 0.95rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   color: #555;
-}
-
-.action {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
-
-.action:hover {
-  background: #0056b3;
-  transform: scale(1.05);
 }
 
 /* =============== FOOTER =============== */
