@@ -169,8 +169,8 @@ main.cards-container {
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Distribuye contenido uniformemente */
-  min-height: 180px; /* Ajusta según tu contenido */
+  justify-content: space-between;
+  min-height: 180px;
 }
 
 .card::before {
@@ -186,11 +186,12 @@ main.cards-container {
 
 .card:hover::before {
   left: 0;
+  background: rgba(0, 123, 255, 0.15);
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px) scale(1.03); /* efecto hover más visible */
+  box-shadow: 0 12px 28px rgba(0, 123, 255, 0.25); /* sombra azul más intensa */
 }
 
 .card h3 {
@@ -258,7 +259,7 @@ footer {
   main.cards-container {
     grid-template-columns: 1fr;
     gap: 1.5rem;
-    grid-auto-rows: auto; /* filas se ajustan al contenido en móvil */
+    grid-auto-rows: auto;
   }
   .splash-logo {
     width: 100px;
