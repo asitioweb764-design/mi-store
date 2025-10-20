@@ -3,151 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestionar aplicaciones - My Store</title>
-  <link rel="stylesheet" href="styles-admin.css" />
+  <title>Administrar Aplicaciones - Mi Store</title>
   <style>
-    .apps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0a0f24, #001a33);
+      overflow-x: hidden;
+      color: white;
+    }
+
+    /* Fondo animado */
+    .bubbles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; }
+    .bubble {
+      position: absolute; bottom: -150px;
+      background: radial-gradient(circle at 30% 30%, #00c3ff, #0066ff);
+      border-radius: 50%; opacity: 0.4;
+      animation: rise 15s infinite ease-in;
+    }
+    @keyframes rise {
+      0% { transform: translateY(0) scale(1); opacity: 0.4; }
+      100% { transform: translateY(-1200px) scale(1.3); opacity: 0; }
+    }
+
+    header {
+      position: fixed; top: 0; left: 0; width: 100%;
+      background: rgba(0,0,0,0.7); display: flex;
+      align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; z-index: 2; backdrop-filter: blur(6px);
+    }
+
+    header h1 { font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 10px; }
+    header img { height: 35px; border-radius: 6px; }
+
+    .buttons { display: flex; gap: 10px; }
+    header button {
+      background: #007bff; border: none; color: white;
+      padding: 0.6rem 1rem; border-radius: 0.5rem;
+      cursor: pointer; font-weight: bold; transition: 0.3s;
+    }
+    header button:hover { background: #339dff; transform: scale(1.05); }
+
+    main {
+      position: relative; z-index: 1;
+      padding: 7rem 2rem 2rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
-      margin-top: 2rem;
     }
 
-    .app-card {
-      background: white;
-      border-radius: 1rem;
-      padding: 1rem;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1rem; padding: 1rem;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-align: center;
     }
 
-    .app-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    .card:hover { transform: translateY(-6px); box-shadow: 0 0 25px rgba(0,195,255,0.3); }
+
+    .card img {
+      width: 100%; height: 120px; object-fit: cover;
+      border-radius: 0.5rem; margin-bottom: 0.8rem;
+      background: #001a33;
     }
 
-    .app-card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 0.8rem;
-      margin-bottom: 0.8rem;
-    }
+    .card h3 { margin: 0.5rem 0; color: #00c3ff; font-size: 1rem; }
+    .card p { color: #bbb; font-size: 0.85rem; margin-bottom: 1rem; }
 
-    .app-card h3 {
-      color: #007bff;
-      margin-bottom: 0.4rem;
+    .card button {
+      background: #ff4757; border: none; color: white;
+      padding: 0.5rem 0.8rem; border-radius: 0.5rem;
+      cursor: pointer; font-size: 0.9rem; transition: 0.3s;
     }
+    .card button:hover { background: #ff6b81; transform: scale(1.05); }
 
-    .app-card p {
-      font-size: 0.9rem;
-      color: #555;
-      margin-bottom: 0.8rem;
-    }
-
-    .delete-btn {
-      background: #ff4757;
-      border: none;
-      color: white;
-      padding: 0.4rem 0.8rem;
-      border-radius: 0.4rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .delete-btn:hover {
-      background: #e84118;
-    }
-
-    .back-btn {
-      margin-top: 1rem;
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .back-btn:hover {
-      background: #0056b3;
-    }
+    footer { text-align: center; color: #bbb; padding: 1rem; font-size: 0.9rem; z-index: 2; }
   </style>
 </head>
 <body>
-  <div class="admin-panel">
-    <header>
-      <div class="logo-section">
-        <img src="logo.png" alt="My Store Logo" class="header-logo" />
-        <h1>Gestionar Aplicaciones</h1>
-      </div>
-      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-    </header>
-
-    <section>
-      <h2>📋 Aplicaciones publicadas</h2>
-      <div id="appsContainer" class="apps-grid">Cargando apps...</div>
-      <button class="back-btn" onclick="goBack()">← Volver al Panel</button>
-    </section>
+  <div class="bubbles">
+    <div class="bubble" style="left: 10%; width: 40px; height: 40px; animation-duration: 13s;"></div>
+    <div class="bubble" style="left: 25%; width: 60px; height: 60px; animation-duration: 18s;"></div>
+    <div class="bubble" style="left: 50%; width: 25px; height: 25px; animation-duration: 10s;"></div>
+    <div class="bubble" style="left: 70%; width: 80px; height: 80px; animation-duration: 16s;"></div>
+    <div class="bubble" style="left: 85%; width: 50px; height: 50px; animation-duration: 14s;"></div>
   </div>
 
+  <header>
+    <h1><img src="logo.png" alt="Mi Store" /> Administrar Aplicaciones</h1>
+    <div class="buttons">
+      <button onclick="window.location.href='admin.html'">Volver al panel</button>
+      <button onclick="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main id="appList"></main>
+
+  <footer>© 2025 Mi Store. Todos los derechos reservados.</footer>
+
   <script>
-    async function loadApps() {
+    async function cargarApps() {
       try {
         const res = await fetch("/api/apps");
         const apps = await res.json();
-        const container = document.getElementById("appsContainer");
-        container.innerHTML = "";
+        const contenedor = document.getElementById("appList");
+        contenedor.innerHTML = "";
 
         if (apps.length === 0) {
-          container.innerHTML = "<p>No hay aplicaciones publicadas todavía.</p>";
+          contenedor.innerHTML = "<p style='text-align:center;color:#bbb;'>No hay apps publicadas aún.</p>";
           return;
         }
 
         apps.forEach((app) => {
           const card = document.createElement("div");
-          card.classList.add("app-card");
+          card.className = "card";
           card.innerHTML = `
-            <img src="/uploads/${app.image}" alt="${app.name}" />
+            <img src="${app.image_url}" alt="${app.name}" onerror="this.src='https://via.placeholder.com/150?text=Sin+imagen'"/>
             <h3>${app.name}</h3>
             <p>${app.description}</p>
-            <button class="delete-btn" onclick="deleteApp(${app.id})">🗑️ Eliminar</button>
+            <button onclick="eliminarApp(${app.id})">🗑️ Eliminar</button>
           `;
-          container.appendChild(card);
+          contenedor.appendChild(card);
         });
       } catch (error) {
         console.error("Error cargando apps:", error);
       }
     }
 
-    async function deleteApp(id) {
-      if (!confirm("¿Seguro que quieres eliminar esta aplicación?")) return;
+    async function eliminarApp(id) {
+      if (!confirm("¿Seguro que deseas eliminar esta app?")) return;
       try {
-        const res = await fetch(`/apps/${id}`, { method: "DELETE" });
+        const res = await fetch(`/api/apps/${id}`, { method: "DELETE" });
         const data = await res.json();
-        alert(data.message);
-        loadApps();
+        alert(data.message || "App eliminada");
+        cargarApps();
       } catch (error) {
-        alert("Error al eliminar la aplicación.");
+        alert("Error al eliminar la app");
       }
-    }
-
-    function goBack() {
-      window.location.href = "admin.html";
     }
 
     function logout() {
-      if (confirm("¿Deseas cerrar sesión?")) {
-        fetch("/logout", { method: "POST" })
-          .then(() => (window.location.href = "/login.html"))
-          .catch(() => alert("Error al cerrar sesión."));
+      if (confirm("¿Seguro que deseas cerrar sesión?")) {
+        window.location.href = "/login.html";
       }
     }
 
-    // Cargar automáticamente las apps al entrar
-    window.addEventListener("load", loadApps);
+    cargarApps();
   </script>
 </body>
 </html>
