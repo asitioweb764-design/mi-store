@@ -4,108 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestionar Aplicaciones - My Store</title>
-  <link rel="stylesheet" href="styles-admin.css" />
   <style>
     :root {
-      --primary: #4f46e5;
-      --primary-light: #6366f1;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --bg: #f4f4f9;
-      --card-bg: #ffffff;
-      --text: #333;
-      --bubble1: rgba(79, 70, 229, 0.2);
-      --bubble2: rgba(147, 51, 234, 0.2);
-    }
-
-    /* 🌙 Modo oscuro */
-    body.dark {
-      --bg: #1a1a2e;
-      --card-bg: #242444;
-      --text: #eaeaea;
-      --bubble1: rgba(79, 70, 229, 0.1);
-      --bubble2: rgba(147, 51, 234, 0.1);
+      --primary: #007bff;
+      --danger: #ff4757;
+      --danger-hover: #e84118;
+      --success: #2ed573;
+      --bg-light: linear-gradient(135deg, #e0f7fa, #fce4ec);
+      --bg-dark: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      --text-light: #333;
+      --text-dark: #f1f1f1;
+      --card-light: #fff;
+      --card-dark: #1e2a35;
     }
 
     * {
       box-sizing: border-box;
-      transition: background 0.3s ease, color 0.3s ease;
+      transition: background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
     }
 
     body {
       margin: 0;
       font-family: "Poppins", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg-light);
+      color: var(--text-light);
       overflow-x: hidden;
-      position: relative;
     }
 
-    /* 🌈 Fondo animado */
+    body.dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    /* 🌈 Burbujas animadas */
     .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: linear-gradient(45deg, var(--bubble1), var(--bubble2));
+      position: fixed;
+      bottom: -150px;
+      background: rgba(255, 255, 255, 0.25);
       border-radius: 50%;
-      opacity: 0.7;
-      animation: rise 12s infinite ease-in;
+      animation: rise 15s infinite ease-in;
+      z-index: 0;
     }
 
     @keyframes rise {
-      from {
-        transform: translateY(0) scale(1);
-        opacity: 0.7;
-      }
-      to {
-        transform: translateY(-120vh) scale(1.5);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) scale(1); opacity: 0.8; }
+      100% { transform: translateY(-1200px) scale(1.5); opacity: 0; }
     }
 
-    /* 🌀 Splash screen */
+    /* 🌀 Splash */
     .splash-screen {
       position: fixed;
       inset: 0;
-      background: var(--primary);
-      color: white;
+      background: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
       z-index: 1000;
-      animation: fadeOut 1s ease forwards;
-      animation-delay: 2.5s;
+      transition: opacity 1s ease;
     }
 
     .splash-logo {
       width: 120px;
-      margin-bottom: 1rem;
-      animation: bounce 1.5s infinite;
+      height: 120px;
+      animation: spin 3s infinite linear;
     }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
+    .splash-text {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #555;
     }
 
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
+    @keyframes spin {
+      from { transform: rotate(0); }
+      to { transform: rotate(360deg); }
     }
 
-    /* 🧩 Panel */
+    /* ⚙️ Panel principal */
     .admin-panel {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      animation: fadeIn 1s ease;
       position: relative;
       z-index: 10;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      opacity: 0;
+      transition: opacity 1s ease;
     }
 
     header {
@@ -113,15 +97,17 @@
       justify-content: space-between;
       align-items: center;
       padding: 1rem 2rem;
-      background: var(--card-bg);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      backdrop-filter: blur(10px);
-      z-index: 10;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .header-logo {
-      height: 40px;
-      margin-right: 1rem;
+    body.dark-mode header {
+      background: rgba(30, 42, 53, 0.9);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     }
 
     .logo-section {
@@ -130,122 +116,106 @@
       gap: 1rem;
     }
 
+    .header-logo { height: 40px; }
+
     .header-buttons {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
+      flex-wrap: wrap;
     }
 
     button {
+      cursor: pointer;
       border: none;
       border-radius: 0.5rem;
-      cursor: pointer;
       padding: 0.6rem 1rem;
       font-size: 0.9rem;
       transition: all 0.3s ease;
     }
 
-    .back-btn {
+    .back-btn, .logout-btn, .refresh-btn, .theme-toggle {
       background: var(--primary);
       color: white;
     }
 
-    .back-btn:hover {
-      background: var(--primary-light);
+    .back-btn:hover, .logout-btn:hover, .refresh-btn:hover, .theme-toggle:hover {
+      background: #0056b3;
       transform: translateY(-2px);
-    }
-
-    .logout-btn {
-      background: var(--danger);
-      color: white;
-    }
-
-    .logout-btn:hover {
-      background: var(--danger-hover);
-      transform: translateY(-2px);
-    }
-
-    .dark-toggle {
-      background: #555;
-      color: #fff;
     }
 
     section {
-      flex: 1;
       max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-      position: relative;
-      z-index: 5;
+      margin: 2rem auto;
+      padding: 1rem;
+      flex: 1;
     }
 
     h2 {
       text-align: center;
-      font-weight: 700;
-      font-size: 1.6rem;
-      margin-bottom: 1rem;
-      animation: fadeIn 1s ease;
+      color: var(--primary);
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
     }
 
-    /* 🎴 Cards */
+    /* 🧩 Tarjetas */
     .apps-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 1.5rem;
+      animation: fadeIn 1s ease;
     }
 
     .app-card {
-      background: var(--card-bg);
+      background: var(--card-light);
       border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      text-align: left;
+      padding: 1.3rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
       position: relative;
       overflow: hidden;
-      animation: floatIn 0.6s ease;
+      animation: bounceIn 0.8s ease forwards;
     }
 
-    @keyframes floatIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+    body.dark-mode .app-card {
+      background: var(--card-dark);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
     }
 
     .app-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     .app-card img {
       width: 60px;
       height: 60px;
-      border-radius: 0.6rem;
-      object-fit: contain;
+      object-fit: cover;
+      border-radius: 0.5rem;
       margin-bottom: 1rem;
     }
 
     .app-card h3 {
       margin: 0;
-      font-size: 1.1rem;
       color: var(--primary);
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
     .app-card p {
       font-size: 0.9rem;
-      color: var(--text);
-      opacity: 0.8;
-      margin: 0.5rem 0 1rem;
+      color: #555;
+      margin: 0.5rem 0 1.2rem;
+      flex: 1;
     }
+
+    body.dark-mode .app-card p { color: #ddd; }
 
     .delete-btn {
       background: var(--danger);
       color: white;
-      font-size: 0.85rem;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
+      align-self: flex-end;
     }
 
     .delete-btn:hover {
@@ -253,25 +223,52 @@
       transform: scale(1.05);
     }
 
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
+    /* ⚡ Animaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-      h2 {
-        font-size: 1.3rem;
-      }
+    @keyframes bounceIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100px); opacity: 0; }
+    }
+
+    /* 🪄 Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--success);
+      color: white;
+      padding: 0.8rem 1.2rem;
+      border-radius: 0.6rem;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
 <body>
-  <!-- 🌈 Burbujas -->
-  <div class="bubble" style="left: 10%; width: 80px; height: 80px; animation-delay: 0s;"></div>
-  <div class="bubble" style="left: 30%; width: 50px; height: 50px; animation-delay: 2s;"></div>
-  <div class="bubble" style="left: 70%; width: 100px; height: 100px; animation-delay: 4s;"></div>
-  <div class="bubble" style="left: 90%; width: 60px; height: 60px; animation-delay: 6s;"></div>
+  <!-- 🌈 Fondo animado -->
+  <div class="bubble" style="left: 10%; width: 60px; height: 60px; animation-delay: 0s;"></div>
+  <div class="bubble" style="left: 30%; width: 40px; height: 40px; animation-delay: 2s;"></div>
+  <div class="bubble" style="left: 50%; width: 80px; height: 80px; animation-delay: 4s;"></div>
+  <div class="bubble" style="left: 70%; width: 50px; height: 50px; animation-delay: 6s;"></div>
+  <div class="bubble" style="left: 90%; width: 70px; height: 70px; animation-delay: 8s;"></div>
 
   <!-- 🌀 Splash -->
   <div class="splash-screen">
@@ -279,7 +276,7 @@
     <div class="splash-text">Cargando aplicaciones...</div>
   </div>
 
-  <!-- ⚙️ Panel principal -->
+  <!-- ⚙️ Panel -->
   <div class="admin-panel">
     <header>
       <div class="logo-section">
@@ -287,78 +284,127 @@
         <h1>Gestionar Aplicaciones</h1>
       </div>
       <div class="header-buttons">
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        <button class="refresh-btn" onclick="refreshApps()">🔄 Actualizar</button>
         <button class="back-btn" onclick="goBack()">← Volver</button>
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-        <button class="dark-toggle" onclick="toggleDark()">🌙</button>
       </div>
     </header>
 
     <section>
-      <h2>📋 Aplicaciones publicadas</h2>
-      <div id="appsContainer" class="apps-grid">Cargando apps...</div>
+      <h2>📋 Aplicaciones Publicadas</h2>
+      <div id="appsContainer" class="apps-grid">
+        <p>Cargando...</p>
+      </div>
     </section>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
+    const themeBtn = document.querySelector(".theme-toggle");
+    const currentTheme = localStorage.getItem("theme");
+
+    if (currentTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      themeBtn.textContent = "☀️";
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("dark-mode");
+      const dark = document.body.classList.contains("dark-mode");
+      themeBtn.textContent = dark ? "☀️" : "🌙";
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    }
+
     async function loadApps() {
+      const container = document.getElementById("appsContainer");
+      container.innerHTML = "<p>Cargando aplicaciones...</p>";
       try {
         const res = await fetch("/api/apps");
         const apps = await res.json();
-        const container = document.getElementById("appsContainer");
         container.innerHTML = "";
 
-        if (apps.length === 0) {
-          container.innerHTML = "<p>No hay aplicaciones publicadas todavía.</p>";
+        if (!apps.length) {
+          container.innerHTML = "<p>No hay aplicaciones publicadas aún.</p>";
           return;
         }
 
-        apps.forEach((app) => {
+        apps.forEach((app, i) => {
           const card = document.createElement("div");
-          card.classList.add("app-card");
+          card.className = "app-card";
+          card.style.animationDelay = `${i * 0.1}s`;
           card.innerHTML = `
             <img src="${app.image}" alt="${app.name}" />
             <h3>${app.name}</h3>
             <p>${app.description}</p>
-            <a href="${app.apk}" target="_blank" style="color:var(--primary);font-size:0.9rem;">⬇️ Descargar APK</a>
-            <button class="delete-btn" onclick="deleteApp(${app.id})">🗑️ Eliminar</button>
+            <button class="delete-btn" onclick="deleteApp(${app.id}, this)">🗑️ Eliminar</button>
           `;
           container.appendChild(card);
         });
-      } catch (error) {
-        console.error("Error cargando apps:", error);
+      } catch {
+        container.innerHTML = "<p>Error al conectar con el servidor 😢</p>";
       }
     }
 
-    async function deleteApp(id) {
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    async function deleteApp(id, btn) {
       if (!confirm("¿Seguro que quieres eliminar esta aplicación?")) return;
+      const card = btn.closest(".app-card");
+      btn.disabled = true;
+      btn.textContent = "Eliminando...";
+
       try {
         const res = await fetch(`/apps/${id}`, { method: "DELETE" });
         const data = await res.json();
-        alert(data.message);
-        loadApps();
-      } catch (error) {
-        alert("Error al eliminar la aplicación.");
+
+        if (res.ok) {
+          card.style.animation = "slideOut 0.6s forwards";
+          setTimeout(() => card.remove(), 600);
+          showToast("✅ Aplicación eliminada con éxito");
+        } else showToast("❌ " + (data.message || "Error al eliminar"));
+      } catch {
+        showToast("⚠️ Error de conexión");
       }
     }
 
-    function goBack() {
-      document.body.classList.add("page-transition");
-      setTimeout(() => (window.location.href = "admin.html"), 700);
+    function refreshApps() {
+      const btn = document.querySelector(".refresh-btn");
+      btn.textContent = "⏳ Actualizando...";
+      btn.disabled = true;
+      loadApps().then(() => {
+        btn.textContent = "🔄 Actualizar";
+        btn.disabled = false;
+        showToast("🔁 Lista actualizada");
+      });
     }
+
+    function goBack() { window.location.href = "admin.html"; }
 
     function logout() {
       if (confirm("¿Deseas cerrar sesión?")) {
         fetch("/logout", { method: "POST" })
           .then(() => (window.location.href = "/login.html"))
-          .catch(() => alert("Error al cerrar sesión."));
+          .catch(() => showToast("Error al cerrar sesión."));
       }
     }
 
-    function toggleDark() {
-      document.body.classList.toggle("dark");
-    }
-
-    window.addEventListener("load", loadApps);
+    window.addEventListener("load", () => {
+      loadApps();
+      setTimeout(() => {
+        document.querySelector(".splash-screen").style.opacity = "0";
+        setTimeout(() => {
+          document.querySelector(".splash-screen").style.display = "none";
+          document.querySelector(".admin-panel").style.opacity = "1";
+        }, 800);
+      }, 1500);
+    });
   </script>
 </body>
 </html>
