@@ -3,360 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestionar Aplicaciones - My Store</title>
-  <style>
-    :root {
-      --primary: #6366f1;
-      --primary-light: #818cf8;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --bg: #f4f4f9;
-      --card-bg: #ffffff;
-      --text: #333;
-      --bubble1: rgba(99, 102, 241, 0.25);
-      --bubble2: rgba(147, 51, 234, 0.25);
-    }
-
-    /* 🌙 Modo oscuro */
-    body.dark {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
-      --bubble1: rgba(99, 102, 241, 0.1);
-      --bubble2: rgba(147, 51, 234, 0.1);
-    }
-
-    * {
-      box-sizing: border-box;
-      transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Poppins", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* 🌈 Burbujas */
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: linear-gradient(45deg, var(--bubble1), var(--bubble2));
-      border-radius: 50%;
-      opacity: 0.7;
-      animation: rise 12s infinite ease-in;
-      z-index: 1;
-    }
-
-    @keyframes rise {
-      from { transform: translateY(0) scale(1); opacity: 0.7; }
-      to { transform: translateY(-120vh) scale(1.5); opacity: 0; }
-    }
-
-    /* 🌀 Splash screen */
-    .splash-screen {
-      position: fixed;
-      inset: 0;
-      background: var(--primary);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      z-index: 1000;
-      animation: fadeOut 1s ease forwards;
-      animation-delay: 2.5s;
-    }
-
-    .splash-logo {
-      width: 100px;
-      margin-bottom: 1rem;
-      animation: bounce 1.5s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; visibility: hidden; }
-    }
-
-    /* ⚙️ Panel */
-    .admin-panel {
-      position: relative;
-      z-index: 10;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      animation: fadeIn 1s ease;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background: var(--card-bg);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      z-index: 10;
-      position: sticky;
-      top: 0;
-    }
-
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .header-logo {
-      height: 40px;
-    }
-
-    .header-buttons {
-      display: flex;
-      gap: 0.6rem;
-    }
-
-    button {
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-    }
-
-    .back-btn {
-      background: var(--primary);
-      color: white;
-    }
-
-    .back-btn:hover { background: var(--primary-light); }
-
-    .logout-btn {
-      background: var(--danger);
-      color: white;
-    }
-
-    .logout-btn:hover { background: var(--danger-hover); }
-
-    .dark-toggle {
-      background: #475569;
-      color: white;
-    }
-
-    section {
-      flex: 1;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    h2 {
-      text-align: center;
-      font-weight: 700;
-      font-size: 1.7rem;
-      margin-bottom: 1.5rem;
-    }
-
-    /* 🔍 Buscador y filtros */
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .search-input, .filter-select {
-      padding: 0.7rem 1rem;
-      border-radius: 0.5rem;
-      border: 1px solid #ccc;
-      font-size: 0.95rem;
-      min-width: 200px;
-      background: var(--card-bg);
-      color: var(--text);
-    }
-
-    /* 🧩 Grid de apps */
-    .apps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .app-card {
-      background: var(--card-bg);
-      border-radius: 1rem;
-      padding: 1.5rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-      text-align: left;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-    }
-
-    .app-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-    }
-
-    .app-card img {
-      width: 60px;
-      height: 60px;
-      border-radius: 0.6rem;
-      object-fit: contain;
-      margin-bottom: 1rem;
-    }
-
-    .app-card h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      color: var(--primary);
-    }
-
-    .app-card p {
-      font-size: 0.9rem;
-      opacity: 0.85;
-      margin: 0.4rem 0 1rem;
-    }
-
-    .app-card small {
-      color: #888;
-      font-size: 0.8rem;
-      display: block;
-      margin-bottom: 0.8rem;
-    }
-
-    .delete-btn {
-      background: var(--danger);
-      color: white;
-      font-size: 0.85rem;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-    }
-
-    .delete-btn:hover { background: var(--danger-hover); }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 600px) {
-      header { flex-direction: column; gap: 1rem; }
-      .controls { flex-direction: column; align-items: stretch; }
-    }
-  </style>
+  <title>Gestionar aplicaciones - My Store</title>
+  <link rel="stylesheet" href="styles-manage.css" />
 </head>
 <body>
-  <!-- 🌈 Burbujas -->
-  <div class="bubble" style="left: 10%; width: 80px; height: 80px; animation-delay: 0s;"></div>
-  <div class="bubble" style="left: 30%; width: 50px; height: 50px; animation-delay: 2s;"></div>
-  <div class="bubble" style="left: 70%; width: 100px; height: 100px; animation-delay: 4s;"></div>
-  <div class="bubble" style="left: 90%; width: 60px; height: 60px; animation-delay: 6s;"></div>
-
-  <!-- 🌀 Splash -->
-  <div class="splash-screen">
-    <img src="logo.png" alt="My Store Logo" class="splash-logo" />
-    <div class="splash-text">Cargando apps...</div>
+  <!-- Fondo animado -->
+  <div class="background">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
   </div>
 
-  <!-- ⚙️ Panel -->
-  <div class="admin-panel">
+  <!-- Pantalla de carga -->
+  <div id="splash">
+    <img src="logo.png" alt="My Store Logo" />
+    <h2>Cargando panel...</h2>
+  </div>
+
+  <!-- Panel principal -->
+  <div class="admin-panel" style="display: none;">
     <header>
       <div class="logo-section">
         <img src="logo.png" alt="My Store Logo" class="header-logo" />
         <h1>Gestionar Aplicaciones</h1>
       </div>
       <div class="header-buttons">
-        <button class="back-btn" onclick="goBack()">← Volver</button>
+        <button class="back-btn" onclick="goBack()">← Volver al Panel</button>
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-        <button class="dark-toggle" onclick="toggleDark()">🌙</button>
       </div>
     </header>
 
     <section>
       <h2>📋 Aplicaciones publicadas</h2>
-
-      <div class="controls">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar por nombre...">
-        <select id="categoryFilter" class="filter-select">
-          <option value="">Todas las categorías</option>
-        </select>
-      </div>
-
       <div id="appsContainer" class="apps-grid">Cargando apps...</div>
     </section>
   </div>
 
   <script>
-    let allApps = [];
+    // === Animación inicial ===
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        document.getElementById("splash").classList.add("hide");
+        document.querySelector(".admin-panel").style.display = "flex";
+      }, 1500);
+      loadApps();
+    });
 
+    // === Cargar aplicaciones ===
     async function loadApps() {
       try {
         const res = await fetch("/api/apps");
-        allApps = await res.json();
-        renderApps(allApps);
-        loadCategories();
+        const apps = await res.json();
+        const container = document.getElementById("appsContainer");
+        container.innerHTML = "";
+
+        if (apps.length === 0) {
+          container.innerHTML = "<p>No hay aplicaciones publicadas todavía.</p>";
+          return;
+        }
+
+        apps.forEach((app, index) => {
+          const card = document.createElement("div");
+          card.classList.add("app-card");
+          card.style.animationDelay = `${index * 0.1}s`;
+          card.innerHTML = `
+            <img src="${app.image}" alt="${app.name}" />
+            <h3>${app.name}</h3>
+            <p>${app.description}</p>
+            <button class="delete-btn" onclick="deleteApp(${app.id})">🗑️ Eliminar</button>
+          `;
+          container.appendChild(card);
+        });
       } catch (error) {
         console.error("Error cargando apps:", error);
       }
     }
 
-    function renderApps(apps) {
-      const container = document.getElementById("appsContainer");
-      container.innerHTML = "";
-
-      if (apps.length === 0) {
-        container.innerHTML = "<p>No se encontraron aplicaciones.</p>";
-        return;
-      }
-
-      apps.forEach((app) => {
-        const card = document.createElement("div");
-        card.classList.add("app-card");
-        card.innerHTML = `
-          <img src="${app.image}" alt="${app.name}" />
-          <h3>${app.name}</h3>
-          <small>${app.category || "Sin categoría"}</small>
-          <p>${app.description}</p>
-          <a href="${app.apk}" target="_blank" style="color:var(--primary);font-size:0.9rem;">⬇️ Descargar APK</a>
-          <button class="delete-btn" onclick="deleteApp(${app.id})">🗑️ Eliminar</button>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function loadCategories() {
-      const select = document.getElementById("categoryFilter");
-      const categories = [...new Set(allApps.map(a => a.category).filter(Boolean))];
-      categories.forEach(cat => {
-        const opt = document.createElement("option");
-        opt.value = cat;
-        opt.textContent = cat;
-        select.appendChild(opt);
-      });
-    }
-
-    function filterApps() {
-      const query = document.getElementById("searchInput").value.toLowerCase();
-      const category = document.getElementById("categoryFilter").value;
-      const filtered = allApps.filter(app =>
-        app.name.toLowerCase().includes(query) &&
-        (category ? app.category === category : true)
-      );
-      renderApps(filtered);
-    }
-
+    // === Eliminar aplicación ===
     async function deleteApp(id) {
       if (!confirm("¿Seguro que quieres eliminar esta aplicación?")) return;
       try {
@@ -369,9 +94,9 @@
       }
     }
 
+    // === Navegación ===
     function goBack() {
-      document.body.classList.add("page-transition");
-      setTimeout(() => (window.location.href = "admin.html"), 700);
+      window.location.href = "admin.html";
     }
 
     function logout() {
@@ -381,14 +106,6 @@
           .catch(() => alert("Error al cerrar sesión."));
       }
     }
-
-    function toggleDark() {
-      document.body.classList.toggle("dark");
-    }
-
-    document.getElementById("searchInput").addEventListener("input", filterApps);
-    document.getElementById("categoryFilter").addEventListener("change", filterApps);
-    window.addEventListener("load", loadApps);
   </script>
 </body>
 </html>
