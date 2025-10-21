@@ -9,38 +9,25 @@
       --primary: #007bff;
       --danger: #ff4757;
       --danger-hover: #e84118;
+      --bg-gradient: linear-gradient(135deg, #e0f7fa, #fce4ec);
       --success: #2ed573;
-      --bg-light: linear-gradient(135deg, #e0f7fa, #fce4ec);
-      --bg-dark: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      --text-light: #333;
-      --text-dark: #f1f1f1;
-      --card-light: #fff;
-      --card-dark: #1e2a35;
     }
 
-    * {
-      box-sizing: border-box;
-      transition: background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: "Poppins", system-ui, sans-serif;
-      background: var(--bg-light);
-      color: var(--text-light);
+      background: var(--bg-gradient);
+      color: #333;
       overflow-x: hidden;
-    }
-
-    body.dark-mode {
-      background: var(--bg-dark);
-      color: var(--text-dark);
     }
 
     /* 🌈 Burbujas animadas */
     .bubble {
       position: fixed;
       bottom: -150px;
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.3);
       border-radius: 50%;
       animation: rise 15s infinite ease-in;
       z-index: 0;
@@ -51,7 +38,7 @@
       100% { transform: translateY(-1200px) scale(1.5); opacity: 0; }
     }
 
-    /* 🌀 Splash */
+    /* 🌀 Splash Screen */
     .splash-screen {
       position: fixed;
       inset: 0;
@@ -105,11 +92,6 @@
       z-index: 100;
     }
 
-    body.dark-mode header {
-      background: rgba(30, 42, 53, 0.9);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    }
-
     .logo-section {
       display: flex;
       align-items: center;
@@ -133,12 +115,12 @@
       transition: all 0.3s ease;
     }
 
-    .back-btn, .logout-btn, .refresh-btn, .theme-toggle {
+    .back-btn, .logout-btn, .refresh-btn {
       background: var(--primary);
       color: white;
     }
 
-    .back-btn:hover, .logout-btn:hover, .refresh-btn:hover, .theme-toggle:hover {
+    .back-btn:hover, .logout-btn:hover, .refresh-btn:hover {
       background: #0056b3;
       transform: translateY(-2px);
     }
@@ -148,6 +130,7 @@
       margin: 2rem auto;
       padding: 1rem;
       flex: 1;
+      position: relative;
     }
 
     h2 {
@@ -166,7 +149,7 @@
     }
 
     .app-card {
-      background: var(--card-light);
+      background: white;
       border-radius: 1rem;
       padding: 1.3rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -178,10 +161,16 @@
       animation: bounceIn 0.8s ease forwards;
     }
 
-    body.dark-mode .app-card {
-      background: var(--card-dark);
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+    .app-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, rgba(0,123,255,0.05), rgba(46,213,115,0.05));
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
+
+    .app-card:hover::before { opacity: 1; }
 
     .app-card:hover {
       transform: translateY(-5px);
@@ -210,12 +199,11 @@
       flex: 1;
     }
 
-    body.dark-mode .app-card p { color: #ddd; }
-
     .delete-btn {
       background: var(--danger);
       color: white;
       align-self: flex-end;
+      transition: transform 0.3s ease, background 0.3s ease;
     }
 
     .delete-btn:hover {
@@ -223,7 +211,7 @@
       transform: scale(1.05);
     }
 
-    /* ⚡ Animaciones */
+    /* 🪄 Animaciones */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -240,7 +228,32 @@
       to { transform: translateX(100px); opacity: 0; }
     }
 
-    /* 🪄 Toast */
+    /* ⚡ Cargando */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.4rem;
+      color: #555;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: #007bff;
+      border-radius: 50%;
+      animation: blink 1.2s infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0; }
+      40% { opacity: 1; }
+    }
+
+    /* ✅ Mensaje flotante */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -276,7 +289,7 @@
     <div class="splash-text">Cargando aplicaciones...</div>
   </div>
 
-  <!-- ⚙️ Panel -->
+  <!-- ⚙️ Contenido -->
   <div class="admin-panel">
     <header>
       <div class="logo-section">
@@ -284,7 +297,6 @@
         <h1>Gestionar Aplicaciones</h1>
       </div>
       <div class="header-buttons">
-        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
         <button class="refresh-btn" onclick="refreshApps()">🔄 Actualizar</button>
         <button class="back-btn" onclick="goBack()">← Volver</button>
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
@@ -294,7 +306,9 @@
     <section>
       <h2>📋 Aplicaciones Publicadas</h2>
       <div id="appsContainer" class="apps-grid">
-        <p>Cargando...</p>
+        <div class="loading">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
       </div>
     </section>
   </div>
@@ -302,24 +316,9 @@
   <div id="toast" class="toast"></div>
 
   <script>
-    const themeBtn = document.querySelector(".theme-toggle");
-    const currentTheme = localStorage.getItem("theme");
-
-    if (currentTheme === "dark") {
-      document.body.classList.add("dark-mode");
-      themeBtn.textContent = "☀️";
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle("dark-mode");
-      const dark = document.body.classList.contains("dark-mode");
-      themeBtn.textContent = dark ? "☀️" : "🌙";
-      localStorage.setItem("theme", dark ? "dark" : "light");
-    }
-
     async function loadApps() {
       const container = document.getElementById("appsContainer");
-      container.innerHTML = "<p>Cargando aplicaciones...</p>";
+      container.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
       try {
         const res = await fetch("/api/apps");
         const apps = await res.json();
@@ -385,7 +384,10 @@
       });
     }
 
-    function goBack() { window.location.href = "admin.html"; }
+    function goBack() {
+      document.body.classList.add("page-transition");
+      setTimeout(() => (window.location.href = "admin.html"), 600);
+    }
 
     function logout() {
       if (confirm("¿Deseas cerrar sesión?")) {
