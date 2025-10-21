@@ -7,10 +7,10 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import cors from "cors";
 import dotenv from "dotenv";
-import db from "./db.js"; // conexión PostgreSQL
-import multer from "multer";
 import fs from "fs";
+import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
+import db from "./db.js"; // conexión PostgreSQL
 
 dotenv.config();
 
@@ -20,7 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static("public"));
 
-// 🧠 Configuración de sesiones
+// ================================
+// ⚙️ CONFIGURAR SESIONES
+// ================================
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "mi-store-secret",
@@ -30,7 +32,7 @@ app.use(
 );
 
 // ================================
-// ⚙️ CONFIGURAR CLOUDINARY
+// ☁️ CONFIGURAR CLOUDINARY
 // ================================
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -38,15 +40,11 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-console.log("✅ Cloudinary configurado con:", {
-  cloud_name: process.env.CLOUD_NAME,
-});
+console.log("✅ Cloudinary configurado correctamente");
 
 // ================================
-// 📦 RUTAS PRINCIPALES
+// 🏠 PÁGINA PRINCIPAL
 // ================================
-
-// 🏠 Página principal
 app.get("/", (req, res) => {
   res.sendFile("index.html", { root: "./public" });
 });
@@ -60,7 +58,6 @@ app.get("/create-admin", async (req, res) => {
 
     const admin = await db.query("SELECT * FROM users WHERE role = 'admin'");
     if (admin.rows.length > 0) {
-      console.log("ℹ️ Ya existe un admin, no se crea otro.");
       return res.json({ message: "✅ Ya existe un usuario admin." });
     }
 
@@ -73,7 +70,7 @@ app.get("/create-admin", async (req, res) => {
       ["admin", hashed, "admin"]
     );
 
-    console.log("✅ Admin insertado correctamente en la base de datos.");
+    console.log("✅ Admin creado correctamente.");
     res.json({
       message: "✅ Usuario admin creado (usuario: admin / contraseña: admin123)",
     });
@@ -90,7 +87,6 @@ app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Buscar usuario
     const result = await db.query("SELECT * FROM users WHERE username = $1", [username]);
     if (result.rows.length === 0) {
       return res.json({ success: false, message: "Usuario no encontrado" });
@@ -99,18 +95,10 @@ app.post("/api/login", async (req, res) => {
     const user = result.rows[0];
     const hash = user.password_hash;
 
-    if (!hash) {
-      console.error("⚠️ Usuario sin hash de contraseña:", user.username);
-      return res.json({ success: false, message: "Error interno: sin contraseña" });
-    }
-
-    // Detectar tipo de hash y comparar
     let isMatch = false;
     if (hash.startsWith("$2")) {
-      // bcrypt
       isMatch = await bcrypt.compare(password, hash);
     } else {
-      // pgcrypto
       const check = await db.query(
         "SELECT username FROM users WHERE username=$1 AND password_hash = crypt($2, password_hash)",
         [username, password]
@@ -118,11 +106,8 @@ app.post("/api/login", async (req, res) => {
       isMatch = check.rows.length > 0;
     }
 
-    if (!isMatch) {
-      return res.json({ success: false, message: "Contraseña incorrecta" });
-    }
+    if (!isMatch) return res.json({ success: false, message: "Contraseña incorrecta" });
 
-    // Guardar sesión
     req.session.user = { id: user.id, username: user.username, role: user.role };
     res.json({ success: true, role: user.role });
   } catch (error) {
@@ -132,27 +117,10 @@ app.post("/api/login", async (req, res) => {
 });
 
 // ================================
-// 🧩 VERIFICAR ADMIN
-// ================================
-app.get("/check-admin", async (req, res) => {
-  try {
-    const result = await db.query("SELECT * FROM users WHERE role = 'admin'");
-    if (result.rows.length === 0) {
-      return res.send("❌ No hay ningún usuario admin en la base de datos.");
-    } else {
-      return res.send("✅ Admin existente en la base de datos.");
-    }
-  } catch (error) {
-    console.error("❌ Error al consultar la base de datos:", error);
-    res.send("❌ Error al consultar la base de datos.");
-  }
-});
-
-// ================================
 // 🚀 SUBIDA DE APPS (IMAGEN + APK)
 // ================================
 
-// Crear carpeta temporal para guardar archivos antes de subirlos
+// Crear carpeta temporal
 const uploadDir = "./uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
@@ -167,7 +135,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 15 * 1024 * 1024 },
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB máximo
   fileFilter: (req, file, cb) => {
     if (
       file.mimetype.startsWith("image/") ||
@@ -180,48 +148,41 @@ const upload = multer({
   },
 });
 
-// 📦 Ruta para subir app con Cloudinary
 app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (req, res) => {
   try {
     const { name, description } = req.body;
-    const imageFile = req.files["image"] ? req.files["image"][0].path : null;
-    const apkFile = req.files["apk"] ? req.files["apk"][0].path : null;
-
-    if (!name || !description || !imageFile || !apkFile) {
-      return res.status(400).json({ message: "Faltan campos o archivos" });
+    if (!req.files?.image || !req.files?.apk) {
+      return res.status(400).json({ message: "Faltan archivos." });
     }
 
     console.log("📸 Subiendo archivos a Cloudinary...");
 
     // Subir imagen
-    const imageUpload = await cloudinary.uploader.upload(imageFile, {
-      folder: "my_store/apps",
-      resource_type: "image",
+    const imagePath = req.files.image[0].path;
+    const imageUpload = await cloudinary.uploader.upload(imagePath, {
+      folder: "mi_store/apps",
     });
 
-    // Subir APK (como tipo raw)
-    const apkUpload = await cloudinary.uploader.upload(apkFile, {
-      folder: "my_store/apks",
+    // Subir APK como "raw"
+    const apkPath = req.files.apk[0].path;
+    const apkUpload = await cloudinary.uploader.upload(apkPath, {
       resource_type: "raw",
+      folder: "mi_store/apks",
     });
 
-    // Eliminar archivos temporales locales
-    fs.unlinkSync(imageFile);
-    fs.unlinkSync(apkFile);
+    // Eliminar archivos temporales
+    fs.unlinkSync(imagePath);
+    fs.unlinkSync(apkPath);
 
-    // Guardar URLs en base de datos
+    // Guardar en DB
     await db.query(
       `INSERT INTO apps (name, description, image, apk, created_at)
        VALUES ($1, $2, $3, $4, NOW())`,
       [name, description, imageUpload.secure_url, apkUpload.secure_url]
     );
 
-    console.log(`✅ App '${name}' subida exitosamente a Cloudinary.`);
-    res.json({
-      message: "✅ App subida con éxito a Cloudinary",
-      imageUrl: imageUpload.secure_url,
-      apkUrl: apkUpload.secure_url,
-    });
+    console.log(`✅ App '${name}' subida correctamente.`);
+    res.json({ message: "App subida con éxito" });
   } catch (error) {
     console.error("❌ Error al subir app:", error);
     res.status(500).json({ message: "Error al subir aplicación", error: error.message });
@@ -242,22 +203,28 @@ app.get("/api/apps", async (req, res) => {
 });
 
 // ================================
-// 🗑️ ELIMINAR APLICACIONES
+// 🗑️ ELIMINAR APPS
 // ================================
 app.delete("/apps/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const appData = await db.query("SELECT * FROM apps WHERE id = $1", [id]);
-
     if (appData.rows.length === 0) {
       return res.status(404).json({ message: "App no encontrada" });
     }
 
     const { image, apk } = appData.rows[0];
 
-    // Eliminar de Cloudinary (opcional, solo si lo deseas)
-    // ⚠️ Nota: Esto requiere el public_id, no solo la URL
-    // Por simplicidad, este código solo elimina de la base de datos
+    // Eliminar de Cloudinary
+    try {
+      const imagePublicId = image.split("/").slice(-2).join("/").split(".")[0];
+      const apkPublicId = apk.split("/").slice(-2).join("/").split(".")[0];
+
+      await cloudinary.uploader.destroy(imagePublicId, { resource_type: "image" });
+      await cloudinary.uploader.destroy(apkPublicId, { resource_type: "raw" });
+    } catch (err) {
+      console.warn("⚠️ No se pudo eliminar de Cloudinary:", err.message);
+    }
 
     await db.query("DELETE FROM apps WHERE id = $1", [id]);
     console.log(`🗑️ App con ID ${id} eliminada correctamente.`);
@@ -269,7 +236,7 @@ app.delete("/apps/:id", async (req, res) => {
 });
 
 // ================================
-// ⚙️ CONFIGURACIÓN DEL SERVIDOR
+// ⚙️ INICIAR SERVIDOR
 // ================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
