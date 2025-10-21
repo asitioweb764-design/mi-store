@@ -8,7 +8,9 @@ import bcrypt from "bcrypt";
 import cors from "cors";
 import dotenv from "dotenv";
 import fs from "fs";
+import path from "path";
 import multer from "multer";
+import { createReadStream } from "fs";
 import { v2 as cloudinary } from "cloudinary";
 import db from "./db.js"; // conexión PostgreSQL
 
@@ -54,8 +56,6 @@ app.get("/", (req, res) => {
 // ================================
 app.get("/create-admin", async (req, res) => {
   try {
-    console.log("🛠️ Intentando crear usuario admin...");
-
     const admin = await db.query("SELECT * FROM users WHERE role = 'admin'");
     if (admin.rows.length > 0) {
       return res.json({ message: "✅ Ya existe un usuario admin." });
@@ -157,17 +157,23 @@ app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (
 
     console.log("📸 Subiendo archivos a Cloudinary...");
 
-    // Subir imagen
+    // === Subir imagen ===
     const imagePath = req.files.image[0].path;
     const imageUpload = await cloudinary.uploader.upload(imagePath, {
       folder: "mi_store/apps",
     });
 
-    // Subir APK como "raw"
+    // === Subir APK como RAW (stream) ===
     const apkPath = req.files.apk[0].path;
-    const apkUpload = await cloudinary.uploader.upload(apkPath, {
-      resource_type: "raw",
-      folder: "mi_store/apks",
+    const apkUpload = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "raw", folder: "mi_store/apks" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      createReadStream(apkPath).pipe(stream);
     });
 
     // Eliminar archivos temporales
@@ -190,7 +196,7 @@ app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (
 });
 
 // ================================
-// 📋 LISTAR APPS (para el admin)
+// 📋 LISTAR APPS
 // ================================
 app.get("/api/apps", async (req, res) => {
   try {
@@ -203,7 +209,7 @@ app.get("/api/apps", async (req, res) => {
 });
 
 // ================================
-// 🗑️ ELIMINAR APPS
+// 🗑️ ELIMINAR APP
 // ================================
 app.delete("/apps/:id", async (req, res) => {
   try {
