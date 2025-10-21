@@ -10,14 +10,15 @@
       --danger: #ff4757;
       --danger-hover: #e84118;
       --bg-gradient: linear-gradient(135deg, #e0f7fa, #fce4ec);
-      --success: #2ed573;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
-      font-family: "Poppins", system-ui, sans-serif;
+      font-family: system-ui, sans-serif;
       background: var(--bg-gradient);
       color: #333;
       overflow-x: hidden;
@@ -27,27 +28,31 @@
     .bubble {
       position: fixed;
       bottom: -150px;
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.25);
       border-radius: 50%;
       animation: rise 15s infinite ease-in;
       z-index: 0;
     }
 
     @keyframes rise {
-      0% { transform: translateY(0) scale(1); opacity: 0.8; }
+      0% { transform: translateY(0) scale(1); opacity: 0.7; }
       100% { transform: translateY(-1200px) scale(1.5); opacity: 0; }
     }
 
     /* 🌀 Splash Screen */
     .splash-screen {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      opacity: 1;
       transition: opacity 1s ease;
     }
 
@@ -57,18 +62,18 @@
       animation: spin 3s infinite linear;
     }
 
-    .splash-text {
-      margin-top: 1rem;
-      font-size: 1.1rem;
-      color: #555;
-    }
-
     @keyframes spin {
       from { transform: rotate(0); }
       to { transform: rotate(360deg); }
     }
 
-    /* ⚙️ Panel principal */
+    .splash-text {
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      color: #555;
+    }
+
+    /* ⚙️ Panel Principal */
     .admin-panel {
       display: flex;
       flex-direction: column;
@@ -84,12 +89,12 @@
       justify-content: space-between;
       align-items: center;
       padding: 1rem 2rem;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 20;
     }
 
     .logo-section {
@@ -98,29 +103,27 @@
       gap: 1rem;
     }
 
-    .header-logo { height: 40px; }
+    .header-logo {
+      height: 40px;
+    }
 
     .header-buttons {
       display: flex;
       gap: 0.6rem;
-      flex-wrap: wrap;
     }
 
-    button {
-      cursor: pointer;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-      transition: all 0.3s ease;
-    }
-
-    .back-btn, .logout-btn, .refresh-btn {
+    .logout-btn, .back-btn {
       background: var(--primary);
       color: white;
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
     }
 
-    .back-btn:hover, .logout-btn:hover, .refresh-btn:hover {
+    .logout-btn:hover, .back-btn:hover {
       background: #0056b3;
       transform: translateY(-2px);
     }
@@ -130,17 +133,16 @@
       margin: 2rem auto;
       padding: 1rem;
       flex: 1;
-      position: relative;
     }
 
     h2 {
       text-align: center;
-      color: var(--primary);
+      color: #007bff;
       margin-bottom: 2rem;
       font-size: 1.8rem;
     }
 
-    /* 🧩 Tarjetas */
+    /* 🧩 Tarjetas de apps */
     .apps-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -151,26 +153,17 @@
     .app-card {
       background: white;
       border-radius: 1rem;
-      padding: 1.3rem;
+      padding: 1.2rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.4s ease;
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
+      min-height: 260px;
       position: relative;
       overflow: hidden;
-      animation: bounceIn 0.8s ease forwards;
+      animation: bounceIn 0.8s ease;
     }
-
-    .app-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(145deg, rgba(0,123,255,0.05), rgba(46,213,115,0.05));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .app-card:hover::before { opacity: 1; }
 
     .app-card:hover {
       transform: translateY(-5px);
@@ -196,14 +189,18 @@
       font-size: 0.9rem;
       color: #555;
       margin: 0.5rem 0 1.2rem;
-      flex: 1;
     }
 
     .delete-btn {
       background: var(--danger);
+      border: none;
       color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.4rem;
+      cursor: pointer;
+      font-size: 0.85rem;
       align-self: flex-end;
-      transition: transform 0.3s ease, background 0.3s ease;
+      transition: all 0.3s ease;
     }
 
     .delete-btn:hover {
@@ -227,52 +224,6 @@
       from { transform: translateX(0); opacity: 1; }
       to { transform: translateX(100px); opacity: 0; }
     }
-
-    /* ⚡ Cargando */
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.4rem;
-      color: #555;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      background: #007bff;
-      border-radius: 50%;
-      animation: blink 1.2s infinite;
-    }
-
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes blink {
-      0%, 80%, 100% { opacity: 0; }
-      40% { opacity: 1; }
-    }
-
-    /* ✅ Mensaje flotante */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      background: var(--success);
-      color: white;
-      padding: 0.8rem 1.2rem;
-      border-radius: 0.6rem;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.4s ease;
-      z-index: 2000;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
   </style>
 </head>
 <body>
@@ -283,13 +234,13 @@
   <div class="bubble" style="left: 70%; width: 50px; height: 50px; animation-delay: 6s;"></div>
   <div class="bubble" style="left: 90%; width: 70px; height: 70px; animation-delay: 8s;"></div>
 
-  <!-- 🌀 Splash -->
+  <!-- 🌀 Pantalla de carga -->
   <div class="splash-screen">
     <img src="logo.png" alt="My Store Logo" class="splash-logo" />
     <div class="splash-text">Cargando aplicaciones...</div>
   </div>
 
-  <!-- ⚙️ Contenido -->
+  <!-- ⚙️ Contenido principal -->
   <div class="admin-panel">
     <header>
       <div class="logo-section">
@@ -297,7 +248,6 @@
         <h1>Gestionar Aplicaciones</h1>
       </div>
       <div class="header-buttons">
-        <button class="refresh-btn" onclick="refreshApps()">🔄 Actualizar</button>
         <button class="back-btn" onclick="goBack()">← Volver</button>
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
       </div>
@@ -305,23 +255,16 @@
 
     <section>
       <h2>📋 Aplicaciones Publicadas</h2>
-      <div id="appsContainer" class="apps-grid">
-        <div class="loading">
-          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-        </div>
-      </div>
+      <div id="appsContainer" class="apps-grid">Cargando apps...</div>
     </section>
   </div>
 
-  <div id="toast" class="toast"></div>
-
   <script>
     async function loadApps() {
-      const container = document.getElementById("appsContainer");
-      container.innerHTML = '<div class="loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
       try {
         const res = await fetch("/api/apps");
         const apps = await res.json();
+        const container = document.getElementById("appsContainer");
         container.innerHTML = "";
 
         if (!apps.length) {
@@ -329,10 +272,10 @@
           return;
         }
 
-        apps.forEach((app, i) => {
+        apps.forEach((app, index) => {
           const card = document.createElement("div");
-          card.className = "app-card";
-          card.style.animationDelay = `${i * 0.1}s`;
+          card.classList.add("app-card");
+          card.style.animationDelay = `${index * 0.1}s`;
           card.innerHTML = `
             <img src="${app.image}" alt="${app.name}" />
             <h3>${app.name}</h3>
@@ -341,16 +284,10 @@
           `;
           container.appendChild(card);
         });
-      } catch {
-        container.innerHTML = "<p>Error al conectar con el servidor 😢</p>";
+      } catch (error) {
+        console.error("Error cargando apps:", error);
+        document.getElementById("appsContainer").innerHTML = "<p>Error al cargar las aplicaciones.</p>";
       }
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3000);
     }
 
     async function deleteApp(id, btn) {
@@ -366,22 +303,16 @@
         if (res.ok) {
           card.style.animation = "slideOut 0.6s forwards";
           setTimeout(() => card.remove(), 600);
-          showToast("✅ Aplicación eliminada con éxito");
-        } else showToast("❌ " + (data.message || "Error al eliminar"));
+        } else {
+          alert(data.message || "Error al eliminar la aplicación.");
+          btn.disabled = false;
+          btn.textContent = "🗑️ Eliminar";
+        }
       } catch {
-        showToast("⚠️ Error de conexión");
-      }
-    }
-
-    function refreshApps() {
-      const btn = document.querySelector(".refresh-btn");
-      btn.textContent = "⏳ Actualizando...";
-      btn.disabled = true;
-      loadApps().then(() => {
-        btn.textContent = "🔄 Actualizar";
+        alert("Error de conexión al eliminar la aplicación.");
         btn.disabled = false;
-        showToast("🔁 Lista actualizada");
-      });
+        btn.textContent = "🗑️ Eliminar";
+      }
     }
 
     function goBack() {
@@ -393,10 +324,11 @@
       if (confirm("¿Deseas cerrar sesión?")) {
         fetch("/logout", { method: "POST" })
           .then(() => (window.location.href = "/login.html"))
-          .catch(() => showToast("Error al cerrar sesión."));
+          .catch(() => alert("Error al cerrar sesión."));
       }
     }
 
+    // 🌀 Splash animación
     window.addEventListener("load", () => {
       loadApps();
       setTimeout(() => {
