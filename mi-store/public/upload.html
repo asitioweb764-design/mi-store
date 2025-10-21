@@ -5,6 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Subir nueva app - My Store</title>
   <link rel="stylesheet" href="styles-upload.css" />
+  <style>
+    /* === Mejoras visuales === */
+    .preview-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px 0;
+    }
+    .preview-container img {
+      max-width: 160px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+      display: none;
+      transition: opacity 0.4s ease;
+    }
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      transition: width 0.4s ease;
+    }
+    #statusMessage {
+      text-align: center;
+      margin-top: 12px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    #statusMessage.success {
+      color: #5af57a;
+    }
+    #statusMessage.error {
+      color: #ff6b6b;
+    }
+  </style>
 </head>
 <body>
   <!-- 🌈 Fondo animado -->
@@ -39,6 +81,9 @@
 
       <label for="image">Imagen de la app (JPG o PNG)</label>
       <input type="file" id="image" name="image" accept="image/*" required />
+      <div class="preview-container">
+        <img id="preview" alt="Vista previa" />
+      </div>
 
       <label for="apk">Archivo APK</label>
       <input type="file" id="apk" name="apk" accept=".apk" required />
@@ -54,23 +99,38 @@
   </div>
 
   <script>
-    // Efecto de volver
+    // 🌈 Efecto volver
     function goBack() {
       document.body.classList.add("page-transition");
       setTimeout(() => (window.location.href = "admin.html"), 700);
     }
 
-    // Subir app con progreso
+    // 🖼️ Vista previa de imagen
+    const imageInput = document.getElementById("image");
+    const preview = document.getElementById("preview");
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+        preview.style.opacity = "1";
+      } else {
+        preview.style.display = "none";
+      }
+    });
+
+    // 🚀 Subir app con progreso
     const form = document.getElementById("uploadForm");
     const progressBar = document.getElementById("progressBar");
     const statusMessage = document.getElementById("statusMessage");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const formData = new FormData(form);
+
       progressBar.style.width = "0%";
-      statusMessage.innerHTML = "";
+      statusMessage.innerHTML = "📤 Subiendo archivos...";
+      statusMessage.className = "";
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/upload", true);
@@ -86,8 +146,9 @@
         if (xhr.status === 200) {
           statusMessage.innerHTML = "✅ Aplicación subida con éxito.";
           statusMessage.className = "success";
-          form.reset();
           progressBar.style.width = "100%";
+          form.reset();
+          preview.style.display = "none";
         } else {
           statusMessage.innerHTML = "❌ Error al subir la aplicación.";
           statusMessage.className = "error";
@@ -100,7 +161,7 @@
       };
 
       xhr.send(formData);
-    });  
+    });
   </script>
 </body>
 </html>
