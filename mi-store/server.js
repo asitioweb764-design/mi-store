@@ -8,6 +8,9 @@ import bcrypt from "bcrypt";
 import cors from "cors";
 import dotenv from "dotenv";
 import db from "./db.js"; // conexión PostgreSQL
+import multer from "multer";
+import fs from "fs";
+import { v2 as cloudinary } from "cloudinary";
 
 dotenv.config();
 
@@ -25,6 +28,19 @@ app.use(
     saveUninitialized: true,
   })
 );
+
+// ================================
+// ⚙️ CONFIGURAR CLOUDINARY
+// ================================
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
+
+console.log("✅ Cloudinary configurado con:", {
+  cloud_name: process.env.CLOUD_NAME,
+});
 
 // ================================
 // 📦 RUTAS PRINCIPALES
@@ -135,20 +151,15 @@ app.get("/check-admin", async (req, res) => {
 // ================================
 // 🚀 SUBIDA DE APPS (IMAGEN + APK)
 // ================================
-import multer from "multer";
-import fs from "fs";
-import path from "path";
 
-// Crear carpeta para guardar archivos si no existe
+// Crear carpeta temporal para guardar archivos antes de subirlos
 const uploadDir = "./uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Configurar Multer para subir imágenes y APKs
+// Configurar Multer
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
     const uniqueName = Date.now() + "-" + file.originalname.replace(/\s+/g, "_");
     cb(null, uniqueName);
   },
@@ -156,7 +167,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 15 * 1024 * 1024 }, // máximo 15MB
+  limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (
       file.mimetype.startsWith("image/") ||
@@ -169,26 +180,48 @@ const upload = multer({
   },
 });
 
-// 📦 Ruta para subir app
+// 📦 Ruta para subir app con Cloudinary
 app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (req, res) => {
   try {
     const { name, description } = req.body;
-    const imageFile = req.files["image"] ? req.files["image"][0].filename : null;
-    const apkFile = req.files["apk"] ? req.files["apk"][0].filename : null;
+    const imageFile = req.files["image"] ? req.files["image"][0].path : null;
+    const apkFile = req.files["apk"] ? req.files["apk"][0].path : null;
 
     if (!name || !description || !imageFile || !apkFile) {
       return res.status(400).json({ message: "Faltan campos o archivos" });
     }
 
-    // Guardar en base de datos
+    console.log("📸 Subiendo archivos a Cloudinary...");
+
+    // Subir imagen
+    const imageUpload = await cloudinary.uploader.upload(imageFile, {
+      folder: "my_store/apps",
+      resource_type: "image",
+    });
+
+    // Subir APK (como tipo raw)
+    const apkUpload = await cloudinary.uploader.upload(apkFile, {
+      folder: "my_store/apks",
+      resource_type: "raw",
+    });
+
+    // Eliminar archivos temporales locales
+    fs.unlinkSync(imageFile);
+    fs.unlinkSync(apkFile);
+
+    // Guardar URLs en base de datos
     await db.query(
       `INSERT INTO apps (name, description, image, apk, created_at)
        VALUES ($1, $2, $3, $4, NOW())`,
-      [name, description, imageFile, apkFile]
+      [name, description, imageUpload.secure_url, apkUpload.secure_url]
     );
 
-    console.log(`✅ App '${name}' subida correctamente.`);
-    res.json({ message: "App subida con éxito" });
+    console.log(`✅ App '${name}' subida exitosamente a Cloudinary.`);
+    res.json({
+      message: "✅ App subida con éxito a Cloudinary",
+      imageUrl: imageUpload.secure_url,
+      apkUrl: apkUpload.secure_url,
+    });
   } catch (error) {
     console.error("❌ Error al subir app:", error);
     res.status(500).json({ message: "Error al subir aplicación", error: error.message });
@@ -208,31 +241,25 @@ app.get("/api/apps", async (req, res) => {
   }
 });
 
-
 // ================================
 // 🗑️ ELIMINAR APLICACIONES
 // ================================
 app.delete("/apps/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    // Verificar si la app existe
     const appData = await db.query("SELECT * FROM apps WHERE id = $1", [id]);
+
     if (appData.rows.length === 0) {
       return res.status(404).json({ message: "App no encontrada" });
     }
 
-    // Eliminar los archivos físicos (imagen y apk)
     const { image, apk } = appData.rows[0];
-    const imagePath = `./uploads/${image}`;
-    const apkPath = `./uploads/${apk}`;
 
-    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-    if (fs.existsSync(apkPath)) fs.unlinkSync(apkPath);
+    // Eliminar de Cloudinary (opcional, solo si lo deseas)
+    // ⚠️ Nota: Esto requiere el public_id, no solo la URL
+    // Por simplicidad, este código solo elimina de la base de datos
 
-    // Eliminar de la base de datos
     await db.query("DELETE FROM apps WHERE id = $1", [id]);
-
     console.log(`🗑️ App con ID ${id} eliminada correctamente.`);
     res.json({ message: "App eliminada correctamente" });
   } catch (error) {
@@ -241,7 +268,6 @@ app.delete("/apps/:id", async (req, res) => {
   }
 });
 
-
 // ================================
 // ⚙️ CONFIGURACIÓN DEL SERVIDOR
 // ================================
@@ -249,7 +275,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
-
-
-
-
