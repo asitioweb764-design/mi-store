@@ -1,5 +1,5 @@
 // ================================
-// 🧩 MI STORE - BACKEND COMPLETO (2025)
+// 🧩 MI STORE - BACKEND COMPLETO
 // ================================
 
 import express from "express";
@@ -41,6 +41,7 @@ cloudinary.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
+
 console.log("✅ Cloudinary configurado correctamente");
 
 // ================================
@@ -51,7 +52,7 @@ app.get("/", (req, res) => {
 });
 
 // ================================
-// 🧑‍💼 CREAR ADMIN (solo una vez)
+// 🧑‍💼 CREAR ADMIN
 // ================================
 app.get("/create-admin", async (req, res) => {
   try {
@@ -75,7 +76,9 @@ app.get("/create-admin", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error al crear admin:", error);
-    res.status(500).json({ message: "Error al crear admin", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error al crear admin", error: error.message });
   }
 });
 
@@ -85,16 +88,18 @@ app.get("/create-admin", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const result = await db.query("SELECT * FROM users WHERE username = $1", [username]);
 
+    const result = await db.query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
     if (result.rows.length === 0) {
       return res.json({ success: false, message: "Usuario no encontrado" });
     }
 
     const user = result.rows[0];
     const hash = user.password_hash;
-    let isMatch = false;
 
+    let isMatch = false;
     if (hash.startsWith("$2")) {
       isMatch = await bcrypt.compare(password, hash);
     } else {
@@ -105,33 +110,38 @@ app.post("/api/login", async (req, res) => {
       isMatch = check.rows.length > 0;
     }
 
-    if (!isMatch) return res.json({ success: false, message: "Contraseña incorrecta" });
+    if (!isMatch)
+      return res.json({ success: false, message: "Contraseña incorrecta" });
 
     req.session.user = { id: user.id, username: user.username, role: user.role };
     res.json({ success: true, role: user.role });
   } catch (error) {
     console.error("❌ Error al iniciar sesión:", error);
-    res.status(500).json({ success: false, message: "Error interno del servidor" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error interno del servidor" });
   }
 });
 
 // ================================
 // 🚀 SUBIDA DE APPS (IMAGEN + APK)
 // ================================
+
 const uploadDir = "./uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname.replace(/\s+/g, "_");
+    const uniqueName =
+      Date.now() + "-" + file.originalname.replace(/\s+/g, "_");
     cb(null, uniqueName);
   },
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25 MB máximo
+  limits: { fileSize: 25 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (
       file.mimetype.startsWith("image/") ||
@@ -144,9 +154,7 @@ const upload = multer({
   },
 });
 
-// ================================
-// ➕ CREAR APP
-// ================================
+// Crear app (equivalente a /upload)
 app.post("/apps", upload.fields([{ name: "image" }, { name: "apk" }]), async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -154,20 +162,21 @@ app.post("/apps", upload.fields([{ name: "image" }, { name: "apk" }]), async (re
       return res.status(400).json({ message: "Faltan archivos." });
     }
 
-    console.log("📸 Subiendo archivos a Cloudinary (POST /apps)...");
+    console.log("📸 Subiendo archivos a Cloudinary...");
 
-    // Subir imagen
     const imagePath = req.files.image[0].path;
     const imageUpload = await cloudinary.uploader.upload(imagePath, {
       folder: "mi_store/apps",
     });
 
-    // Subir APK
     const apkPath = req.files.apk[0].path;
     const apkUpload = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { resource_type: "raw", folder: "mi_store/apks" },
-        (error, result) => (error ? reject(error) : resolve(result))
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
       );
       createReadStream(apkPath).pipe(stream);
     });
@@ -175,17 +184,76 @@ app.post("/apps", upload.fields([{ name: "image" }, { name: "apk" }]), async (re
     fs.unlinkSync(imagePath);
     fs.unlinkSync(apkPath);
 
-    const insertResult = await db.query(
+    const result = await db.query(
       `INSERT INTO apps (name, description, image, apk, created_at)
-       VALUES ($1, $2, $3, $4, NOW()) RETURNING *`,
+       VALUES ($1, $2, $3, $4, NOW())
+       RETURNING *`,
       [name, description, imageUpload.secure_url, apkUpload.secure_url]
     );
 
-    console.log(`✅ App '${name}' creada correctamente.`);
-    res.json(insertResult.rows[0]);
+    res.json(result.rows[0]);
   } catch (error) {
-    console.error("❌ Error al crear app:", error);
-    res.status(500).json({ message: "Error al crear aplicación", error: error.message });
+    console.error("❌ Error al subir app:", error);
+    res.status(500).json({ message: "Error al subir aplicación", error: error.message });
+  }
+});
+
+// ================================
+// ✏️ ACTUALIZAR APP
+// ================================
+app.put("/apps/:id", upload.fields([{ name: "image" }, { name: "apk" }]), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    // Verificar que exista
+    const appData = await db.query("SELECT * FROM apps WHERE id = $1", [id]);
+    if (appData.rows.length === 0) {
+      return res.status(404).json({ message: "App no encontrada" });
+    }
+
+    let imageUrl = appData.rows[0].image;
+    let apkUrl = appData.rows[0].apk;
+
+    // Si se sube nueva imagen
+    if (req.files?.image) {
+      const imagePath = req.files.image[0].path;
+      const uploadImg = await cloudinary.uploader.upload(imagePath, {
+        folder: "mi_store/apps",
+      });
+      imageUrl = uploadImg.secure_url;
+      fs.unlinkSync(imagePath);
+    }
+
+    // Si se sube nuevo APK
+    if (req.files?.apk) {
+      const apkPath = req.files.apk[0].path;
+      const uploadApk = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "raw", folder: "mi_store/apks" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        createReadStream(apkPath).pipe(stream);
+      });
+      apkUrl = uploadApk.secure_url;
+      fs.unlinkSync(apkPath);
+    }
+
+    const updated = await db.query(
+      `UPDATE apps
+       SET name = $1, description = $2, image = $3, apk = $4
+       WHERE id = $5
+       RETURNING *`,
+      [name || appData.rows[0].name, description || appData.rows[0].description, imageUrl, apkUrl, id]
+    );
+
+    res.json(updated.rows[0]);
+  } catch (error) {
+    console.error("❌ Error al actualizar app:", error);
+    res.status(500).json({ message: "Error al actualizar app", error: error.message });
   }
 });
 
@@ -199,63 +267,6 @@ app.get("/api/apps", async (req, res) => {
   } catch (error) {
     console.error("❌ Error al obtener apps:", error);
     res.status(500).json({ message: "Error al obtener apps" });
-  }
-});
-
-// ================================
-// ✏️ ACTUALIZAR APP
-// ================================
-app.put("/apps/:id", upload.fields([{ name: "image" }, { name: "apk" }]), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description } = req.body;
-
-    const appData = await db.query("SELECT * FROM apps WHERE id = $1", [id]);
-    if (appData.rows.length === 0) {
-      return res.status(404).json({ message: "App no encontrada" });
-    }
-
-    const oldApp = appData.rows[0];
-    let newImage = oldApp.image;
-    let newApk = oldApp.apk;
-
-    // Subir nueva imagen (si existe)
-    if (req.files?.image) {
-      const imagePath = req.files.image[0].path;
-      const imageUpload = await cloudinary.uploader.upload(imagePath, {
-        folder: "mi_store/apps",
-      });
-      newImage = imageUpload.secure_url;
-      fs.unlinkSync(imagePath);
-    }
-
-    // Subir nuevo APK (si existe)
-    if (req.files?.apk) {
-      const apkPath = req.files.apk[0].path;
-      const apkUpload = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { resource_type: "raw", folder: "mi_store/apks" },
-          (error, result) => (error ? reject(error) : resolve(result))
-        );
-        createReadStream(apkPath).pipe(stream);
-      });
-      newApk = apkUpload.secure_url;
-      fs.unlinkSync(apkPath);
-    }
-
-    const updateResult = await db.query(
-      `UPDATE apps 
-       SET name = $1, description = $2, image = $3, apk = $4 
-       WHERE id = $5
-       RETURNING *`,
-      [name || oldApp.name, description || oldApp.description, newImage, newApk, id]
-    );
-
-    console.log(`✏️ App '${updateResult.rows[0].name}' actualizada correctamente.`);
-    res.json({ message: "App actualizada con éxito", app: updateResult.rows[0] });
-  } catch (error) {
-    console.error("❌ Error al actualizar app (PUT /apps/:id):", error);
-    res.status(500).json({ message: "Error al actualizar aplicación", error: error.message });
   }
 });
 
@@ -281,7 +292,6 @@ app.delete("/apps/:id", async (req, res) => {
     }
 
     await db.query("DELETE FROM apps WHERE id = $1", [id]);
-    console.log(`🗑️ App con ID ${id} eliminada correctamente.`);
     res.json({ message: "App eliminada correctamente" });
   } catch (error) {
     console.error("❌ Error al eliminar app:", error);
