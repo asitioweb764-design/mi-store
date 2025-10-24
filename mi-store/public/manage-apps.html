@@ -7,7 +7,7 @@
 
   <style>
     /* -------------------------
-       Paleta y variables
+       Paleta y variables (manteniendo el estilo)
        ------------------------- */
     :root{
       --primary:#6366f1;
@@ -21,14 +21,14 @@
       --text-light:#0f1724;
       --text-dark:#f8fafc;
       --glass: rgba(255,255,255,0.6);
+      --muted:#6b7280;
+      --shadow: 0 10px 30px rgba(2,6,23,0.06);
+      --radius:12px;
     }
 
     *{box-sizing:border-box;}
     html,body{height:100%;}
 
-    /* -------------------------
-       Base
-       ------------------------- */
     body{
       margin:0;
       font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
@@ -46,50 +46,11 @@
     a{color:var(--primary); text-decoration:none;}
     img{display:block; max-width:100%;}
 
-    /* -------------------------
-       Burbujas de fondo
-       ------------------------- */
-    .bubble{
-      position:fixed;
-      bottom:-200px;
-      border-radius:50%;
-      filter: blur(8px);
-      opacity:0.6;
-      z-index:0;
-      animation:rise 18s linear infinite;
-      pointer-events:none;
-    }
-    .bubble.b1{left:6%; width:120px; height:120px; background:linear-gradient(135deg,var(--primary),var(--accent)); animation-duration:20s;}
-    .bubble.b2{left:28%; width:80px; height:80px; background:linear-gradient(135deg,#a78bfa,#7dd3fc); animation-duration:16s; animation-delay:2s;}
-    .bubble.b3{left:50%; width:140px; height:140px; background:linear-gradient(135deg,#60a5fa,#c084fc); animation-duration:22s; animation-delay:4s;}
-    .bubble.b4{left:72%; width:90px; height:90px; background:linear-gradient(135deg,#34d399,#60a5fa); animation-duration:18s; animation-delay:6s;}
-    .bubble.b5{left:90%; width:110px; height:110px; background:linear-gradient(135deg,#fb7185,#f97316); animation-duration:24s; animation-delay:8s;}
-
-    @keyframes rise{
-      0%{transform:translateY(0) scale(1); opacity:0.8;}
-      100%{transform:translateY(-130vh) scale(1.2); opacity:0;}
-    }
-
-    /* -------------------------
-       Splash screen
-       ------------------------- */
-    .splash{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column;
-      background:linear-gradient(135deg,#111827,#1f2937);
-      color:white; z-index:9999;
-    }
-    .splash .logo{width:110px; height:110px; border-radius:18px; background:white; display:flex; align-items:center; justify-content:center; margin-bottom:16px; box-shadow:0 12px 40px rgba(0,0,0,0.4); transform-origin:center; animation:spin 3s linear infinite;}
-    .splash .text{font-weight:600; opacity:0.95;}
-    @keyframes spin{from{transform:rotate(0)} to{transform:rotate(360deg)}}
-
-    /* -------------------------
-       Layout header
-       ------------------------- */
-    .wrap{position:relative; min-height:100vh; z-index:10;}
+    /* header */
     header.app-header{
       position:sticky; top:0; z-index:50;
       display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding:14px 20px; background:rgba(255,255,255,0.8);
+      gap:12px; padding:14px 20px; background:rgba(255,255,255,0.92);
       backdrop-filter: blur(6px); box-shadow:0 6px 20px rgba(2,6,23,0.06);
     }
     body.dark header.app-header{ background:rgba(10,18,28,0.6); box-shadow:0 6px 20px rgba(0,0,0,0.6); }
@@ -105,145 +66,116 @@
     }
     .btn.secondary{ background:transparent; border:1px solid rgba(0,0,0,0.06); color:inherit; font-weight:600; box-shadow:none;}
     .small{padding:6px 10px; font-size:0.9rem;}
+    .muted { color: var(--muted); font-weight:500; }
 
-    .theme-toggle{background:rgba(0,0,0,0.06); color:inherit; border-radius:10px; padding:8px; font-weight:700;}
+    /* container */
+    main.container{ max-width:1200px; margin:20px auto 80px; padding:0 18px; z-index:20; position:relative;}
+    .topbar{ display:flex; gap:12px; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+    h2.title{ margin:0; color:var(--primary-600); font-size:1.35rem; }
 
-    /* -------------------------
-       Content area
-       ------------------------- */
-    main.container{ max-width:1200px; margin:28px auto; padding:0 18px 80px; z-index:20; position:relative;}
-    h2.title{ text-align:center; margin:6px 0 18px; color:var(--primary-600); font-size:1.5rem; }
-
-    /* Controls */
-    .controls{display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:18px;}
+    /* controls */
+    .controls{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
     .search{
       display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; min-width:260px;
-      background:var(--card-light); box-shadow:0 6px 18px rgba(2,6,23,0.04); border:1px solid rgba(0,0,0,0.04);
+      background:var(--card-light); box-shadow:var(--shadow); border:1px solid rgba(0,0,0,0.04);
     }
     .search input{ border:none; outline:none; font-size:14px; min-width:180px; background:transparent; color:inherit; }
     .select, .tiny-btn{ padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); background:var(--card-light); }
 
-    body.dark .search, body.dark .select{ background:#0b1220; border:1px solid rgba(255,255,255,0.04); box-shadow:none; }
-
-    /* Grid */
+    /* grid */
     .apps-grid{ display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); align-items:stretch; }
 
     .card{
-      background:var(--card-light); padding:14px; border-radius:14px; position:relative; overflow:hidden;
-      box-shadow:0 10px 30px rgba(2,6,23,0.06); transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow .28s;
+      background:var(--card-light); padding:14px; border-radius:var(--radius); position:relative; overflow:hidden;
+      box-shadow:var(--shadow); transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow .28s;
       display:flex; flex-direction:column; gap:10px; min-height:220px;
     }
     body.dark .card{ background:var(--card-dark); box-shadow:0 8px 26px rgba(0,0,0,0.6); }
-
-    .card:hover{ transform:translateY(-8px); box-shadow:0 18px 44px rgba(2,6,23,0.12); }
+    .card:hover{ transform:translateY(-6px); box-shadow:0 18px 44px rgba(2,6,23,0.12); }
 
     .meta{ display:flex; gap:12px; align-items:center; }
     .meta img{ width:64px; height:64px; border-radius:12px; object-fit:cover; }
     .meta .info h3{ margin:0; font-size:1.05rem; color:var(--primary-600); }
-    .meta .info small{ color: #6b7280; display:block; margin-top:6px; font-size:0.86rem; }
+    .meta .info small{ color: var(--muted); display:block; margin-top:6px; font-size:0.86rem; }
 
     .desc{ color:#374151; font-size:0.95rem; line-height:1.35; flex:1; }
-    body.dark .desc{ color:#d1d5db; }
-
     .card-actions{ display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:6px; }
-    .card .link-apk{ color:var(--accent); font-weight:600; font-size:0.92rem; text-decoration:none; }
 
-    /* Delete / Edit */
-    .danger{ background:var(--danger); color:white; padding:8px 12px; border-radius:10px; font-weight:700; }
-    .edit{ background:transparent; border:1px solid rgba(0,0,0,0.06); padding:8px 12px; border-radius:10px; }
+    .link-apk{ color:var(--accent); font-weight:600; font-size:0.92rem; text-decoration:none; }
 
-    body.dark .edit{ border-color: rgba(255,255,255,0.06); }
+    .danger{ background:var(--danger); color:white; padding:8px 12px; border-radius:10px; font-weight:700; border:none; cursor:pointer; }
+    .edit{ background:transparent; border:1px solid rgba(0,0,0,0.06); padding:8px 12px; border-radius:10px; cursor:pointer; }
 
-    /* Animations for delete */
-    @keyframes slideFade {
-      0% {opacity:1; transform:translateX(0);}
-      100% {opacity:0; transform:translateX(90px) scale(.98);}
-    }
-
-    /* Toast */
+    /* toast */
     .toast{ position:fixed; right:18px; bottom:18px; background: #10b981; color:white; padding:12px 18px; border-radius:10px; box-shadow:0 12px 40px rgba(2,6,23,0.18); opacity:0; transform: translateY(8px); transition:all .32s; z-index:9999;}
     .toast.show{ opacity:1; transform: translateY(0); }
 
-    /* Modal (edit) */
+    /* modal */
     .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:9998; padding:20px; }
     .modal{
-      width:100%; max-width:760px; background:var(--card-light); border-radius:12px; padding:18px; box-shadow:0 20px 60px rgba(2,6,23,0.35);
+      width:100%; max-width:820px; background:var(--card-light); border-radius:12px; padding:18px; box-shadow:0 20px 60px rgba(2,6,23,0.35);
+      max-height:92vh; overflow:auto;
     }
-    body.dark .modal{ background:#0f1724; color:var(--text-dark); }
-
-    .modal .row{ display:flex; gap:12px; margin-bottom:12px; align-items:center; }
+    .modal .row{ display:flex; gap:12px; margin-bottom:12px; align-items:center; flex-wrap:wrap; }
     .modal label{ font-weight:700; font-size:0.9rem; margin-bottom:6px; display:block; }
     .modal input[type="text"], .modal textarea{ width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); }
     .modal input[type="file"]{ padding:8px; }
     .modal .actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
 
-    /* Preview image */
     .preview{ width:92px; height:92px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,0,0,0.06); }
-    body.dark .preview{ border-color: rgba(255,255,255,0.06); }
 
-    /* Loading small */
+    /* small spinner */
     .spinner{ width:14px; height:14px; border-radius:999px; border:3px solid rgba(255,255,255,0.2); border-top-color:white; animation:spin1 .7s linear infinite; display:inline-block; }
     @keyframes spin1{ to{ transform:rotate(360deg); } }
 
     /* responsive tweaks */
-    @media (max-width:720px){
+    @media (max-width:900px){
       .meta img{ width:56px; height:56px; }
       .card{ padding:12px; }
-      header.app-header{ padding:12px; }
       main.container{ padding:0 14px; }
+      .modal{ max-width:92%; padding:14px; }
+    }
+    @media (max-width:520px){
+      header.app-header{ padding:10px; flex-direction:column; gap:8px; align-items:flex-start; }
+      .controls{ width:100%; justify-content:flex-start; }
+      .search{ min-width:unset; flex:1; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Burbujas -->
-  <div class="bubble b1"></div>
-  <div class="bubble b2"></div>
-  <div class="bubble b3"></div>
-  <div class="bubble b4"></div>
-  <div class="bubble b5"></div>
-
-  <!-- SPLASH -->
-  <div class="splash" id="splash">
-    <div class="logo" aria-hidden="true">💠</div>
-    <div class="text">Cargando panel... <span style="opacity:.85;display:inline-block;margin-left:8px;">(casi listo)</span></div>
-  </div>
-
-  <div class="wrap">
-    <!-- HEADER -->
-    <header class="app-header">
-      <div class="brand">
-        <img src="logo.png" alt="logo" />
-        <div>
-          <h1>My Store · Panel</h1>
-          <small style="color:#6b7280;">Gestión de aplicaciones</small>
-        </div>
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="brand">
+      <img src="logo.png" alt="logo" />
+      <div>
+        <h1>My Store · Panel</h1>
+        <small class="muted">Gestión de aplicaciones · manage-apps</small>
       </div>
+    </div>
 
-      <div class="header-actions">
-        <button class="btn small" id="refreshBtn">🔄 Actualizar</button>
-        <button class="btn small" id="newBtn" style="background:var(--accent); box-shadow:0 6px 20px rgba(6,182,212,0.18)">➕ Nueva app</button>
-        <button class="btn small theme-toggle" id="themeBtn">🌙</button>
-        <button class="btn small secondary" id="logoutBtn" style="background:transparent; border:1px solid rgba(0,0,0,0.06)">Cerrar sesión</button>
-      </div>
-    </header>
+    <div class="header-actions">
+      <button class="btn small" id="refreshBtn">🔄 Actualizar</button>
+      <button class="btn small" id="newBtn" style="background:var(--accent); box-shadow:0 6px 20px rgba(6,182,212,0.18)">➕ Nueva app</button>
+      <a class="btn small secondary" id="backBtn" href="admin.html" style="background:transparent; border:1px solid rgba(0,0,0,0.06)">↩️ Volver al panel principal</a>
+    </div>
+  </header>
 
-    <!-- MAIN -->
-    <main class="container">
+  <main class="container" role="main">
+    <div class="topbar">
       <h2 class="title">📋 Administrar Aplicaciones</h2>
 
-      <!-- CONTROLS -->
-      <div class="controls">
-        <div class="search">
+      <div class="controls" aria-label="Filtros">
+        <div class="search" role="search" aria-label="Buscar apps">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.8"><path d="M21 21l-4.35-4.35" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="5" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="searchInput" type="text" placeholder="Buscar por nombre..." />
+          <input id="searchInput" type="text" placeholder="Buscar por nombre..." aria-label="Buscar por nombre" />
         </div>
 
-        <select id="categorySelect" class="select">
+        <select id="categorySelect" class="select" aria-label="Filtrar por categoría">
           <option value="">Todas las categorías</option>
         </select>
 
-        <select id="sortSelect" class="select">
+        <select id="sortSelect" class="select" aria-label="Ordenar">
           <option value="new">Más recientes</option>
           <option value="old">Más antiguas</option>
           <option value="name_asc">Nombre A → Z</option>
@@ -252,53 +184,56 @@
 
         <button class="tiny-btn" id="clearFilter">Limpiar</button>
       </div>
+    </div>
 
-      <!-- GRID -->
-      <div id="appsGrid" class="apps-grid">
-        <!-- cards injected here -->
-      </div>
-    </main>
-  </div>
+    <!-- GRID -->
+    <div id="appsGrid" class="apps-grid" aria-live="polite">
+      <!-- cards injected here -->
+    </div>
+  </main>
 
   <!-- TOAST -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- EDIT / CREATE MODAL (hidden by default) -->
-  <div id="modalBackdrop" class="modal-backdrop" style="display:none;">
+  <div id="modalBackdrop" class="modal-backdrop" style="display:none;" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <h3 id="modalTitle">Editar aplicación</h3>
 
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
-        <div style="flex:1;min-width:240px;">
-          <label>Nombre</label>
-          <input id="modalName" type="text" placeholder="Nombre de la app" />
+      <form id="modalForm">
+        <input type="hidden" id="modalId" name="id" />
+        <div class="row">
+          <div style="flex:1; min-width:220px;">
+            <label for="modalName">Nombre</label>
+            <input id="modalName" name="name" type="text" placeholder="Nombre de la app" required />
+          </div>
+          <div style="width:120px; display:flex; flex-direction:column; gap:8px; align-items:center;">
+            <label>Preview</label>
+            <img id="modalPreview" class="preview" src="placeholder.png" alt="preview" />
+          </div>
         </div>
-        <div style="width:120px">
-          <label>Preview</label>
-          <img id="modalPreview" class="preview" src="" alt="preview" />
-        </div>
-      </div>
 
-      <div style="margin-top:10px;">
-        <label>Descripción</label>
-        <textarea id="modalDesc" rows="4" placeholder="Descripción corta"></textarea>
-      </div>
-
-      <div style="display:flex;gap:12px; margin-top:8px; flex-wrap:wrap; align-items:center;">
-        <div>
-          <label>Imagen (PNG/JPG)</label>
-          <input id="modalImage" type="file" accept="image/*" />
+        <div style="margin-top:8px;">
+          <label for="modalDesc">Descripción</label>
+          <textarea id="modalDesc" name="description" rows="4" placeholder="Descripción corta"></textarea>
         </div>
-        <div>
-          <label>APK</label>
-          <input id="modalApk" type="file" accept=".apk" />
-        </div>
-      </div>
 
-      <div class="actions" style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px;">
-        <button id="modalCancel" class="btn secondary">Cancelar</button>
-        <button id="modalSave" class="btn" style="background:var(--primary-600)">Guardar cambios</button>
-      </div>
+        <div style="display:flex;gap:12px; margin-top:8px; flex-wrap:wrap; align-items:center;">
+          <div>
+            <label for="modalImage">Imagen (PNG/JPG)</label>
+            <input id="modalImage" name="image" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label for="modalApk">APK</label>
+            <input id="modalApk" name="apk" type="file" accept=".apk" />
+          </div>
+        </div>
+
+        <div class="actions" style="display:flex;justify-content:flex-end;margin-top:12px;gap:8px;">
+          <button type="button" id="modalCancel" class="btn secondary">Cancelar</button>
+          <button type="submit" id="modalSave" class="btn" style="background:var(--primary-600)">Guardar cambios</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -307,6 +242,7 @@
     let apps = [];
     let filter = { q:'', category:'', sort:'new' };
     let editingId = null;
+    let lastObjectUrl = null;
     const toastEl = document.getElementById('toast');
     const appsGrid = document.getElementById('appsGrid');
 
@@ -319,31 +255,30 @@
     }
 
     function formatDate(sqlDate){
-      try{
-        const d = new Date(sqlDate);
-        return d.toLocaleString();
-      }catch{ return sqlDate; }
+      try{ const d = new Date(sqlDate); return d.toLocaleString(); } catch { return sqlDate; }
     }
 
-    // ---------- Fetch & render ----------
-    async function fetchApps(){
-      try{
-        document.getElementById('refreshBtn').textContent = '⏳ Cargando...';
-        document.getElementById('refreshBtn').disabled = true;
-
-        const res = await fetch('/api/apps');
-        if(!res.ok) throw new Error('No se pudo obtener apps');
-        apps = await res.json();
-        renderApps();
-        populateCategories();
-      }catch(err){
-        console.error(err);
-        appsGrid.innerHTML = '<p style="color:#ef4444">Error cargando apps. Revisa el servidor.</p>';
-      }finally{
-        document.getElementById('refreshBtn').textContent = '🔄 Actualizar';
-        document.getElementById('refreshBtn').disabled = false;
+    // ---------- safeFetch ----------
+    async function safeFetch(path, opts = {}){
+      const cfg = {
+        credentials: 'include',
+        ...opts
+      };
+      const res = await fetch(path, cfg);
+      const ctype = res.headers.get('content-type') || '';
+      if(ctype.includes('application/json')){
+        const json = await res.json();
+        if(!res.ok) throw Object.assign(new Error(json.message || 'Error'), { status: res.status, body: json });
+        return json;
+      } else {
+        const text = await res.text();
+        if(!res.ok) throw Object.assign(new Error(text || 'Error'), { status: res.status, body: text });
+        return text;
       }
     }
+
+    // ---------- Render seguro ----------
+    function escapeHtml(str=''){ return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]); }
 
     function renderApps(){
       const q = filter.q.trim().toLowerCase();
@@ -356,44 +291,81 @@
       if(filter.sort==='name_asc') list.sort((a,b)=> a.name.localeCompare(b.name));
       if(filter.sort==='name_desc') list.sort((a,b)=> b.name.localeCompare(a.name));
 
+      appsGrid.innerHTML = '';
       if(list.length===0){
-        appsGrid.innerHTML = '<p style="text-align:center; color:#6b7280;">No se encontraron aplicaciones.</p>';
+        appsGrid.innerHTML = '<p style="text-align:center; color:var(--muted)">No se encontraron aplicaciones.</p>';
         return;
       }
 
-      appsGrid.innerHTML = '';
       list.forEach((app, idx) => {
         const card = document.createElement('div');
         card.className = 'card';
         card.style.animationDelay = (idx*40)+'ms';
-        card.innerHTML = `
-          <div class="meta">
-            <img src="${app.image || 'placeholder.png'}" alt="${escapeHtml(app.name)}" />
-            <div class="info">
-              <h3>${escapeHtml(app.name)}</h3>
-              <small>${escapeHtml(app.category || 'Sin categoría')} · ${formatDate(app.created_at || '')}</small>
-            </div>
-          </div>
-          <div class="desc">${escapeHtml(app.description || '')}</div>
-          <div class="card-actions">
-            <a class="link-apk" href="${app.apk}" target="_blank" rel="noopener">⬇️ Descargar APK</a>
-            <button class="edit" onclick="openEdit(${app.id})">✏️ Editar</button>
-            <button class="danger" onclick="confirmDelete(${app.id}, this)">🗑️ Eliminar</button>
-          </div>
-        `;
+
+        // meta
+        const meta = document.createElement('div'); meta.className='meta';
+        const img = document.createElement('img'); img.src = app.image || 'placeholder.png'; img.alt = app.name || 'preview';
+        const info = document.createElement('div'); info.className='info';
+        const h3 = document.createElement('h3'); h3.textContent = app.name || 'Sin nombre';
+        const small = document.createElement('small'); small.textContent = `${app.category || 'Sin categoría'} · ${formatDate(app.created_at || '')}`;
+        info.appendChild(h3); info.appendChild(small);
+        meta.appendChild(img); meta.appendChild(info);
+        card.appendChild(meta);
+
+        // description
+        const desc = document.createElement('div'); desc.className='desc'; desc.textContent = app.description || '';
+        card.appendChild(desc);
+
+        // actions
+        const actions = document.createElement('div'); actions.className='card-actions';
+        const link = document.createElement('a'); link.className='link-apk';
+        try { link.href = app.apk || '#'; } catch { link.href = '#'; }
+        link.target = '_blank'; link.rel='noopener'; link.textContent = '⬇️ Descargar APK';
+        actions.appendChild(link);
+
+        const editBtn = document.createElement('button'); editBtn.className='edit'; editBtn.textContent='✏️ Editar';
+        editBtn.addEventListener('click', ()=> openEdit(app.id));
+        actions.appendChild(editBtn);
+
+        const delBtn = document.createElement('button'); delBtn.className='danger'; delBtn.textContent='🗑️ Eliminar';
+        delBtn.addEventListener('click', ()=> confirmDelete(app.id, delBtn));
+        actions.appendChild(delBtn);
+
+        card.appendChild(actions);
         appsGrid.appendChild(card);
       });
     }
 
-    function escapeHtml(str=''){ return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]); }
+    // ---------- Fetch apps ----------
+    async function fetchApps(){
+      try{
+        document.getElementById('refreshBtn').textContent = '⏳ Cargando...';
+        document.getElementById('refreshBtn').disabled = true;
+        const data = await safeFetch('/api/apps');
+        // backend returns array
+        apps = Array.isArray(data) ? data : (data.items || []);
+        renderApps();
+        populateCategories();
+      }catch(err){
+        console.error(err);
+        appsGrid.innerHTML = '<p style="color:#ef4444">Error cargando apps. Revisa el servidor.</p>';
+        showToast(err.message || 'Error cargando apps', false);
+      }finally{
+        document.getElementById('refreshBtn').textContent = '🔄 Actualizar';
+        document.getElementById('refreshBtn').disabled = false;
+      }
+    }
 
+    // ---------- Populate categories ----------
     function populateCategories(){
       const set = new Set(apps.map(a => a.category).filter(Boolean));
       const sel = document.getElementById('categorySelect');
+      const current = sel.value;
       sel.innerHTML = '<option value="">Todas las categorías</option>';
       set.forEach(c => {
         const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
       });
+      if([...set].includes(current)) sel.value=current;
     }
 
     // ---------- Delete ----------
@@ -403,30 +375,24 @@
       try{
         btn.disabled = true;
         btn.textContent = 'Eliminando...';
-        const res = await fetch(`/apps/${id}`, { method:'DELETE' });
-        const data = await res.json();
-        if(res.ok){
-          // animate removal visually
-          const card = btn.closest('.card');
-          card.style.animation = 'slideFade 0.6s forwards';
-          setTimeout(()=>card.remove(), 650);
-          // also update local apps array
-          apps = apps.filter(a=>a.id!==id);
-          showToast(data.message || 'Eliminado');
-        } else {
-          showToast(data.message || 'Error al eliminar', false);
-          btn.disabled = false; btn.textContent = '🗑️ Eliminar';
-        }
+        const data = await safeFetch(`/apps/${id}`, { method: 'DELETE' });
+        apps = apps.filter(a=>a.id!==id);
+        renderApps();
+        showToast(data.message || 'Eliminado');
       }catch(err){
         console.error(err);
-        showToast('Error de conexión', false);
-        btn.disabled = false; btn.textContent = '🗑️ Eliminar';
+        showToast(err.message || 'Error al eliminar', false);
+      }finally{
+        btn.disabled = false;
+        btn.textContent = '🗑️ Eliminar';
       }
     }
 
-    // ---------- Modal (create/edit) ----------
+    // ---------- Modal handling ----------
     const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalForm = document.getElementById('modalForm');
     const modalTitle = document.getElementById('modalTitle');
+    const modalId = document.getElementById('modalId');
     const modalName = document.getElementById('modalName');
     const modalDesc = document.getElementById('modalDesc');
     const modalImage = document.getElementById('modalImage');
@@ -436,45 +402,79 @@
     const modalCancel = document.getElementById('modalCancel');
     const newBtn = document.getElementById('newBtn');
 
-    newBtn.addEventListener('click', ()=>openCreate());
+    newBtn.addEventListener('click', ()=> openCreate());
+    document.getElementById('refreshBtn').addEventListener('click', fetchApps);
 
     function openCreate(){
       editingId = null;
       modalTitle.textContent = 'Crear nueva aplicación';
+      modalId.value = '';
       modalName.value = '';
       modalDesc.value = '';
       modalPreview.src = 'placeholder.png';
       modalImage.value = '';
       modalApk.value = '';
-      modalBackdrop.style.display = 'flex';
+      showModal();
     }
 
     function openEdit(id){
-      editingId = id;
       const app = apps.find(a=>a.id===id);
       if(!app){ showToast('App no encontrada', false); return; }
+      editingId = id;
       modalTitle.textContent = 'Editar aplicación';
+      modalId.value = id;
       modalName.value = app.name || '';
       modalDesc.value = app.description || '';
       modalPreview.src = app.image || 'placeholder.png';
       modalImage.value = '';
       modalApk.value = '';
-      modalBackdrop.style.display = 'flex';
+      showModal();
     }
 
-    modalCancel.addEventListener('click', ()=>{ modalBackdrop.style.display='none'; });
+    function showModal(){
+      modalBackdrop.style.display = 'flex';
+      modalBackdrop.setAttribute('aria-hidden','false');
+      // focus trap basic
+      const focusables = modalBackdrop.querySelectorAll('a,button,input,textarea,select');
+      const first = focusables[0], last = focusables[focusables.length-1];
+      function handleKey(e){
+        if(e.key !== 'Tab') return;
+        if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+      }
+      modalBackdrop._keyHandler = handleKey;
+      modalBackdrop.addEventListener('keydown', handleKey);
+      // set focus
+      setTimeout(()=> modalName.focus(), 80);
+    }
+
+    function closeModal(){
+      modalBackdrop.style.display = 'none';
+      modalBackdrop.setAttribute('aria-hidden','true');
+      if(modalBackdrop._keyHandler) modalBackdrop.removeEventListener('keydown', modalBackdrop._keyHandler);
+      // revoke object url
+      if(lastObjectUrl){ URL.revokeObjectURL(lastObjectUrl); lastObjectUrl = null; }
+    }
+
+    modalCancel.addEventListener('click', (e)=>{ e.preventDefault(); closeModal(); });
 
     // preview image on choose
     modalImage.addEventListener('change', (e)=> {
       const f = e.target.files[0];
-      if(f) modalPreview.src = URL.createObjectURL(f);
+      if(f){
+        if(lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
+        lastObjectUrl = URL.createObjectURL(f);
+        modalPreview.src = lastObjectUrl;
+      }
     });
 
-    // SAVE (create or update)
-    modalSave.addEventListener('click', async ()=>{
+    // ---------- Submit modal (create or update) ----------
+    modalForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
       const name = modalName.value.trim();
       const desc = modalDesc.value.trim();
-      if(!name || !desc){ alert('Nombre y descripción son obligatorios'); return; }
+      if(!name){ alert('El nombre es obligatorio'); return; }
 
       modalSave.disabled = true;
       modalSave.textContent = '⏳ Guardando...';
@@ -488,17 +488,24 @@
 
         let res;
         if(editingId){
-          res = await fetch(`/apps/${editingId}`, { method:'PUT', body: fd });
+          // PUT /apps/:id
+          res = await fetch(`/apps/${editingId}`, { method: 'PUT', body: fd, credentials: 'include' });
         } else {
-          res = await fetch('/apps', { method:'POST', body: fd }); // backend create route — if not present, will return 404
+          // POST /apps
+          res = await fetch('/apps', { method: 'POST', body: fd, credentials: 'include' });
         }
 
-        const data = await res.json();
-        if(!res.ok) { throw new Error(data.message || 'Error en servidor'); }
+        // try parse JSON safely
+        const ctype = res.headers.get('content-type') || '';
+        const data = ctype.includes('application/json') ? await res.json() : await res.text();
+
+        if(!res.ok){
+          const msg = (data && data.message) ? data.message : (typeof data === 'string' ? data : 'Error en servidor');
+          throw new Error(msg);
+        }
 
         showToast(editingId ? 'Actualización guardada' : 'App creada');
-        modalBackdrop.style.display = 'none';
-        // refresh list
+        closeModal();
         await fetchApps();
       }catch(err){
         console.error(err);
@@ -509,83 +516,42 @@
       }
     });
 
-    // ---------- Filters / controls ----------
+    // ---------- Filters ----------
     const searchInput = document.getElementById('searchInput');
     const categorySelect = document.getElementById('categorySelect');
     const sortSelect = document.getElementById('sortSelect');
     const clearFilterBtn = document.getElementById('clearFilter');
 
-    searchInput.addEventListener('input', (e)=>{ filter.q = e.target.value; renderApps(); });
+    function debounce(fn, wait=250){ let t; return (...a)=>{ clearTimeout(t); t = setTimeout(()=>fn(...a), wait); }; }
+    const debouncedRender = debounce(()=> renderApps(), 220);
+
+    searchInput.addEventListener('input', (e)=>{ filter.q = e.target.value; debouncedRender(); });
     categorySelect.addEventListener('change', (e)=>{ filter.category = e.target.value; renderApps(); });
     sortSelect.addEventListener('change', (e)=>{ filter.sort = e.target.value; renderApps(); });
     clearFilterBtn.addEventListener('click', ()=>{ searchInput.value=''; categorySelect.value=''; sortSelect.value='new'; filter={q:'',category:'',sort:'new'}; renderApps(); });
 
-    // populate category select helper
-    function populateCategories(){
-      const set = new Set(apps.map(a=>a.category).filter(Boolean));
-      const sel = categorySelect;
-      const current = sel.value;
-      sel.innerHTML = '<option value="">Todas las categorías</option>';
-      set.forEach(c=>{
-        const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
-      });
-      if([...set].includes(current)) sel.value=current;
-    }
-
-    // ---------- Refresh / logout / theme ----------
-    document.getElementById('refreshBtn').addEventListener('click', fetchApps);
-
-    document.getElementById('logoutBtn').addEventListener('click', ()=>{
-      if(!confirm('¿Cerrar sesión?')) return;
-      fetch('/logout',{method:'POST'}).then(()=> location.href='/login.html').catch(()=> showToast('Error al cerrar sesión', false));
-    });
-
-    const themeBtn = document.getElementById('themeBtn');
-    (function initTheme(){
-      const t = localStorage.getItem('theme');
-      if(t==='dark'){ document.body.classList.add('dark'); themeBtn.textContent='☀️'; }
-      else themeBtn.textContent='🌙';
-    })();
-    themeBtn.addEventListener('click', ()=>{
-      const dark = document.body.classList.toggle('dark');
-      themeBtn.textContent = dark ? '☀️' : '🌙';
-      localStorage.setItem('theme', dark ? 'dark' : 'light');
-    });
-
-    // ---------- New app quick route (open upload page) ----------
-    // If you prefer to use upload.html to create, you can redirect; otherwise modal Create will be used.
-    document.getElementById('newBtn').addEventListener('click', ()=>{
-      // If you want to use the upload page: uncomment next line and comment openCreate()
-      // window.location.href = 'upload.html';
-      openCreate();
-    });
-
-    // ---------- Escape key closes modal ----------
-    window.addEventListener('keydown', (e)=> {
-      if(e.key==='Escape') modalBackdrop.style.display='none';
-    });
-
-    // ---------- safe initial hide splash and load ----------
+    // ---------- initial load & splash hide ----------
     window.addEventListener('load', ()=>{
-      setTimeout(()=> {
-        const s = document.getElementById('splash');
-        s.style.transition = 'opacity .9s'; s.style.opacity = 0;
-        setTimeout(()=> s.style.display='none', 900);
-        fetchApps();
-      }, 900);
+      // hide any splash if present
+      const s = document.getElementById('splash');
+      if(s){ s.style.display='none'; }
+      fetchApps();
     });
 
-    // ---------- small utility: create app endpoint if not exists ----------
-    // Note: frontend assumes these endpoints:
-    // GET  /api/apps        -> list apps (we use)
-    // DELETE /apps/:id      -> delete (we use)
-    // PUT /apps/:id         -> update (used by modal)
-    // POST /apps            -> create (used by modal)
-    //
-    // If your backend doesn't have POST /apps or PUT /apps/:id, these calls will return errors. Backend changes needed:
-    // - POST /apps: same behavior as /upload but returns created app JSON
-    // - PUT /apps/:id: accept FormData for fields and return updated app JSON
+    // ---------- keyboard escape closes modal ----------
+    window.addEventListener('keydown', (e)=> { if(e.key==='Escape'){ closeModal(); } });
 
+    // ---------- small safety: ensure endpoints exist message ----------
+    // If backend responds with HTML (unexpected), show a clear message in console
+    (async function checkApi(){
+      try{
+        const r = await fetch('/api/apps', { credentials: 'include' });
+        const ctype = r.headers.get('content-type') || '';
+        if(!ctype.includes('application/json')) {
+          console.warn('Advertencia: /api/apps no devuelve JSON. Asegúrate de que el backend devuelva JSON para /api/apps.');
+        }
+      }catch(e){}
+    })();
   </script>
 </body>
 </html>
