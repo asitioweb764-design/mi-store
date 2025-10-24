@@ -155,12 +155,6 @@ app.post("/upload", upload.fields([{ name: "image" }, { name: "apk" }]), async (
       return res.status(400).json({ message: "Faltan archivos." });
     }
 
-app.post("/apps", (req, res, next) => {
-  req.url = "/upload";
-  next();
-});
-
-
     console.log("📸 Subiendo archivos a Cloudinary...");
 
     // === Subir imagen ===
@@ -254,5 +248,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
 
 
