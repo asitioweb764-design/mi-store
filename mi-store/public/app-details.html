@@ -10,35 +10,39 @@
       margin: 0;
       font-family: "Poppins", sans-serif;
       background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+      color: #333;
     }
 
     header {
       background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(10px);
-      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 1rem 2rem;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
     }
 
-    .back-btn {
-      background: none;
+    header button {
+      background: #4f46e5;
+      color: white;
       border: none;
-      color: #4f46e5;
-      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
       cursor: pointer;
+      transition: 0.3s;
     }
 
-    .app-container {
+    header button:hover {
+      background: #3730a3;
+    }
+
+    .container {
       max-width: 900px;
       margin: 2rem auto;
       background: white;
       border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       overflow: hidden;
       padding: 2rem;
     }
@@ -47,42 +51,48 @@
       display: flex;
       flex-wrap: wrap;
       gap: 2rem;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .app-header img {
       width: 200px;
       height: 200px;
+      border-radius: 20px;
       object-fit: cover;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
     .app-info {
       flex: 1;
     }
 
-    .app-info h2 {
-      margin-top: 0;
+    .app-info h1 {
+      margin: 0;
       font-size: 1.8rem;
-      color: #111;
+      color: #4f46e5;
     }
 
     .stars {
       color: #fbbf24;
       margin: 0.5rem 0;
+      font-size: 1.3rem;
+    }
+
+    .description {
+      margin: 1rem 0;
+      line-height: 1.5;
     }
 
     .download-btn {
+      display: inline-block;
       background: #4f46e5;
       color: white;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      border-radius: 25px;
-      font-size: 1rem;
-      cursor: pointer;
+      padding: 0.8rem 1.5rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
       transition: 0.3s;
     }
+
     .download-btn:hover {
       background: #3730a3;
     }
@@ -91,236 +101,207 @@
       margin-top: 2rem;
     }
 
-    .review-card {
-      border-top: 1px solid #ddd;
-      padding: 1rem 0;
+    .reviews h2 {
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
     }
 
-    .review-card:last-child {
-      border-bottom: none;
-    }
-
-    .review-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .review-header strong {
-      font-size: 1rem;
-    }
-
-    .review-stars {
-      color: #fbbf24;
-    }
-
-    form {
-      margin-top: 2rem;
+    .review {
       background: #f9fafb;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .review strong {
+      color: #4f46e5;
+    }
+
+    .new-review {
+      margin-top: 2rem;
+      background: #eef2ff;
       padding: 1.5rem;
       border-radius: 15px;
     }
 
-    form h3 {
-      margin-top: 0;
-    }
-
     textarea {
       width: 100%;
-      min-height: 80px;
-      padding: 0.7rem;
+      resize: vertical;
+      padding: 0.8rem;
       border-radius: 10px;
       border: 1px solid #ccc;
-      resize: vertical;
       font-family: inherit;
     }
 
-    .stars-input i {
-      font-size: 1.5rem;
-      color: #ccc;
+    .rating-stars i {
+      font-size: 1.8rem;
+      color: #d1d5db;
       cursor: pointer;
-      transition: 0.2s;
+      transition: color 0.2s;
     }
 
-    .stars-input i.active {
+    .rating-stars i.active {
       color: #fbbf24;
     }
 
     .submit-btn {
-      margin-top: 1rem;
       background: #4f46e5;
       color: white;
       border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 20px;
+      padding: 0.8rem 1.5rem;
+      border-radius: 30px;
       cursor: pointer;
-      transition: 0.3s;
-    }
-    .submit-btn:hover {
-      background: #3730a3;
+      margin-top: 1rem;
+      font-size: 1rem;
     }
 
-    .no-reviews {
-      color: #555;
-      font-style: italic;
+    .submit-btn:hover {
+      background: #3730a3;
     }
   </style>
 </head>
 <body>
   <header>
-    <button class="back-btn" onclick="window.location.href='index.html'">
-      <i class="fa fa-arrow-left"></i> Volver
-    </button>
-    <h2>Detalles de la App</h2>
+    <h2><a href="index.html" style="text-decoration:none; color:#4f46e5;">⬅ Volver</a></h2>
+    <button onclick="logout()">Cerrar sesión</button>
   </header>
 
-  <main class="app-container">
+  <div class="container">
     <div class="app-header">
-      <img id="appImage" src="" alt="App Image">
+      <img id="appImage" src="" alt="App" />
       <div class="app-info">
-        <h2 id="appName">Cargando...</h2>
-        <p id="appCategory"></p>
+        <h1 id="appName">Cargando...</h1>
+        <div id="appCategory"></div>
         <div class="stars" id="appStars"></div>
-        <p id="appDescription"></p>
-        <button id="downloadBtn" class="download-btn">Descargar APK</button>
+        <div class="description" id="appDescription"></div>
+        <a id="downloadBtn" class="download-btn" href="#">Descargar</a>
       </div>
     </div>
 
-    <section class="reviews">
-      <h3>Reseñas</h3>
-      <div id="reviewsList"></div>
-    </section>
+    <div class="reviews">
+      <h2>Reseñas</h2>
+      <div id="reviewsList">Cargando reseñas...</div>
+    </div>
 
-    <form id="reviewForm">
-      <h3>Deja tu reseña</h3>
-      <div class="stars-input" id="starsInput">
+    <div class="new-review">
+      <h3>Deja tu valoración</h3>
+      <div class="rating-stars" id="ratingStars">
         <i class="fa-regular fa-star" data-value="1"></i>
         <i class="fa-regular fa-star" data-value="2"></i>
         <i class="fa-regular fa-star" data-value="3"></i>
         <i class="fa-regular fa-star" data-value="4"></i>
         <i class="fa-regular fa-star" data-value="5"></i>
       </div>
-      <textarea id="comment" placeholder="Escribe tu reseña..."></textarea>
-      <button type="submit" class="submit-btn">Enviar reseña</button>
-    </form>
-  </main>
+      <textarea id="comment" rows="4" placeholder="Escribe tu reseña..."></textarea>
+      <button class="submit-btn" onclick="submitReview()">Enviar</button>
+    </div>
+  </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const appId = urlParams.get("id");
+    const params = new URLSearchParams(window.location.search);
+    const appId = params.get("id");
     const username = sessionStorage.getItem("username");
-    const downloadBtn = document.getElementById("downloadBtn");
-
     let selectedRating = 0;
 
     async function loadAppDetails() {
-      const res = await fetch("/api/apps");
-      const apps = await res.json();
-      const app = apps.find(a => a.id == appId);
+      const res = await fetch(`/api/apps/${appId}`);
+      const app = await res.json();
 
-      if (!app) {
-        document.body.innerHTML = "<h2 style='text-align:center'>App no encontrada</h2>";
-        return;
-      }
-
-      document.getElementById("appImage").src = app.image;
       document.getElementById("appName").textContent = app.name;
       document.getElementById("appCategory").textContent = app.category || "Sin categoría";
-      document.getElementById("appDescription").textContent = app.description;
+      document.getElementById("appDescription").textContent = app.description || "Sin descripción";
+      document.getElementById("appImage").src = app.image;
       document.getElementById("appStars").innerHTML = renderStars(app.average_rating || 0);
 
-      // Descargar bloqueado si no está logueado
+      const downloadBtn = document.getElementById("downloadBtn");
       if (!username) {
-        downloadBtn.textContent = "Inicia sesión para descargar";
-        downloadBtn.disabled = true;
-        downloadBtn.style.background = "#ccc";
-        downloadBtn.style.cursor = "not-allowed";
+        downloadBtn.onclick = () => alert("Debes iniciar sesión para descargar esta app.");
+        downloadBtn.href = "#";
       } else {
-        downloadBtn.onclick = () => window.location.href = app.apk;
+        downloadBtn.href = app.file_url;
       }
-
-      loadReviews();
     }
 
     async function loadReviews() {
-      const res = await fetch(`/api/apps/${appId}/reviews`);
-      const reviews = await res.json();
-      const container = document.getElementById("reviewsList");
+      try {
+        const res = await fetch(`/api/apps/${appId}/reviews`);
+        const reviews = await res.json();
 
-      container.innerHTML = "";
-      if (reviews.length === 0) {
-        container.innerHTML = "<p class='no-reviews'>No hay reseñas aún. ¡Sé el primero en opinar!</p>";
-        return;
+        const container = document.getElementById("reviewsList");
+        container.innerHTML = reviews.length
+          ? reviews.map(r => `
+            <div class="review">
+              <strong>${r.username}</strong> — ${renderStars(r.rating)}
+              <p>${r.comment || ""}</p>
+              <small>${r.created_at}</small>
+            </div>
+          `).join("")
+          : "<p>No hay reseñas todavía.</p>";
+      } catch (err) {
+        console.error("Error al cargar reseñas:", err);
       }
-
-      reviews.forEach(r => {
-        const div = document.createElement("div");
-        div.classList.add("review-card");
-        div.innerHTML = `
-          <div class="review-header">
-            <strong>${r.username}</strong>
-            <div class="review-stars">${renderStars(r.rating)}</div>
-          </div>
-          <p>${r.comment || ""}</p>
-          <small>${new Date(r.created_at).toLocaleString()}</small>
-        `;
-        container.appendChild(div);
-      });
     }
 
     function renderStars(rating) {
       const rounded = Math.round(rating);
-      let starsHTML = "";
+      let html = "";
       for (let i = 1; i <= 5; i++) {
-        starsHTML += `<i class="fa${i <= rounded ? 's' : 'r'} fa-star"></i>`;
+        html += `<i class="fa${i <= rounded ? 's' : 'r'} fa-star"></i>`;
       }
-      return starsHTML;
+      return html;
     }
 
-    // Control de estrellas interactivas
-    document.querySelectorAll("#starsInput i").forEach(star => {
+    // --- Sistema de selección de estrellas ---
+    document.querySelectorAll("#ratingStars i").forEach(star => {
       star.addEventListener("click", () => {
         selectedRating = parseInt(star.dataset.value);
-        document.querySelectorAll("#starsInput i").forEach(s => {
-          s.classList.toggle("active", parseInt(s.dataset.value) <= selectedRating);
+        document.querySelectorAll("#ratingStars i").forEach(s => {
+          s.classList.toggle("active", s.dataset.value <= selectedRating);
         });
       });
     });
 
-    // Enviar reseña
-    document.getElementById("reviewForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    async function submitReview() {
       if (!username) {
         alert("Debes iniciar sesión para dejar una reseña.");
         return;
       }
-      if (selectedRating === 0) {
-        alert("Selecciona una calificación con estrellas.");
+
+      if (!selectedRating) {
+        alert("Por favor selecciona una valoración.");
         return;
       }
 
       const comment = document.getElementById("comment").value.trim();
-      const payload = { username, rating: selectedRating, comment };
 
       const res = await fetch(`/api/apps/${appId}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ username, rating: selectedRating, comment })
       });
 
-      if (res.ok) {
-        alert("Reseña enviada con éxito ✅");
+      const data = await res.json();
+
+      if (data.success) {
+        alert("¡Reseña enviada!");
         document.getElementById("comment").value = "";
         selectedRating = 0;
-        document.querySelectorAll("#starsInput i").forEach(s => s.classList.remove("active"));
+        document.querySelectorAll("#ratingStars i").forEach(s => s.classList.remove("active"));
         loadReviews();
+        loadAppDetails(); // actualiza promedio
       } else {
-        const data = await res.json();
-        alert("Error: " + (data.message || "No se pudo enviar la reseña"));
+        alert("Error al enviar reseña.");
       }
-    });
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
 
     loadAppDetails();
+    loadReviews();
   </script>
 </body>
 </html>
