@@ -13,110 +13,6 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import db from "./db.js"; // conexión PostgreSQL
 
-import pkg from "pg";
-const { Pool } = pkg;
-
-// Conexión a tu base de datos (ajusta credenciales)
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, 
-  ssl: { rejectUnauthorized: false }
-});
-
-// ========================================================
-// ✅ Obtener TODAS las apps
-// ========================================================
-app.get("/api/apps", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT id, name, category, image, is_paid, 
-             COALESCE(average_rating, 0) AS average_rating
-      FROM apps
-      ORDER BY id DESC
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    console.error("❌ Error al obtener apps:", err);
-    res.status(500).json({ error: "Error al obtener las apps" });
-  }
-});
-
-// ========================================================
-// ✅ Obtener detalles de UNA app específica
-// ========================================================
-app.get("/api/apps/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query(`
-      SELECT id, name, description, category, image, file_url, is_paid, 
-             COALESCE(average_rating, 0) AS average_rating
-      FROM apps
-      WHERE id = $1
-    `, [id]);
-
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: "App no encontrada" });
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error("❌ Error al obtener app:", err);
-    res.status(500).json({ error: "Error al obtener los detalles de la app" });
-  }
-});
-
-// ========================================================
-// ✅ Obtener reseñas de una app
-// ========================================================
-app.get("/api/apps/:id/reviews", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query(`
-      SELECT username, rating, comment, created_at
-      FROM app_reviews
-      WHERE app_id = $1
-      ORDER BY created_at DESC
-    `, [id]);
-    res.json(result.rows);
-  } catch (err) {
-    console.error("❌ Error al obtener reseñas:", err);
-    res.status(500).json({ error: "Error al obtener reseñas" });
-  }
-});
-
-// ========================================================
-// ✅ Publicar una nueva reseña
-// ========================================================
-app.post("/api/apps/:id/reviews", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { username, rating, comment } = req.body;
-
-    if (!username || !rating)
-      return res.status(400).json({ error: "Faltan datos" });
-
-    await pool.query(`
-      INSERT INTO app_reviews (app_id, username, rating, comment)
-      VALUES ($1, $2, $3, $4)
-    `, [id, username, rating, comment || null]);
-
-    // Recalcular promedio
-    await pool.query(`
-      UPDATE apps
-      SET average_rating = (
-        SELECT ROUND(AVG(rating)::numeric, 1)
-        FROM app_reviews
-        WHERE app_id = $1
-      )
-      WHERE id = $1
-    `, [id]);
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error("❌ Error al guardar reseña:", err);
-    res.status(500).json({ error: "Error al guardar reseña" });
-  }
-});
-
-
 dotenv.config();
 
 const app = express();
@@ -470,6 +366,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
 
 
 
