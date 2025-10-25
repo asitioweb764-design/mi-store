@@ -1,391 +1,296 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mi Store - Tienda de Apps</title>
-  <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda de Apps</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    /* ---------- Base ---------- */
-    :root{
-      --bg-a: #eef2ff;
-      --bg-b: #f3e8ff;
-      --card-bg: rgba(255,255,255,0.06);
-      --glass: rgba(255,255,255,0.08);
-      --muted: #94a3b8;
-      --accent: #7c3aed; /* violeta */
-      --accent-2: #06b6d4;
-      --radius: 14px;
-      --text: #e6eef8;
+    * {
+      box-sizing: border-box;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-      background: linear-gradient(180deg,#eaf2ff 0%, #f6eefe 100%);
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      display:flex;
-      flex-direction:column;
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+      overflow-x: hidden;
     }
 
-    /* ---------- BURBUJAS (fondo) ---------- */
-    .bubbles{
-      position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+    /* Burbujas animadas */
+    .bubbles {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+      z-index: 0;
     }
-    .bubble{
-      position:absolute; bottom:-200px; border-radius:50%; filter: blur(10px); opacity:.55;
-      background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(6,182,212,0.9));
-      animation:rise linear infinite;
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      animation: rise 20s infinite ease-in;
     }
     @keyframes rise {
-      0%{ transform: translateY(0) scale(1); opacity:.9 }
-      100%{ transform: translateY(-120vh) scale(1.4); opacity:0 }
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-1200px) scale(1.3); opacity: 0; }
     }
 
-    /* ---------- HEADER ---------- */
-    header.app-header{
-      position:sticky; top:0; z-index:20;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding:14px 20px; background: rgba(12,14,23,0.08);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(0,0,0,0.04);
-    }
-    .brand{display:flex;align-items:center;gap:12px}
-    .brand img{width:44px;height:44px;border-radius:9px;object-fit:cover}
-    .brand h1{font-size:1.12rem;color:var(--accent);margin:0;font-weight:700}
-
-    .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .search{
-      display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.12);
-      box-shadow: 0 6px 18px rgba(2,6,23,0.04);
-    }
-    .search input{ border:none; outline:none; background:transparent; color:#0f1724; width:220px; padding:4px 6px; font-weight:600; }
-    .select{ padding:8px 10px; border-radius:8px; border:none; background:rgba(255,255,255,0.12); color:#0f1724; font-weight:600; }
-
-    .header-actions{display:flex;gap:10px;align-items:center}
-    .btn{
-      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:none;background:var(--accent);color:white;font-weight:700;cursor:pointer;
-    }
-    .btn.secondary{ background:transparent; border:1px solid rgba(0,0,0,0.06); color: var(--accent); font-weight:700 }
-
-    /* ---------- MAIN / GRID ---------- */
-    main.container{ position:relative; z-index:10; max-width:1200px; margin:22px auto 36px; padding:0 18px; width:100%;}
-    .apps-grid{
-      display:grid;
-      justify-content:center; /* centro cuando pocas columnas */
-      grid-template-columns: repeat(auto-fit, minmax(280px, 320px)); /* ancho máximo por tarjeta */
-      gap:18px;
-      align-items:start;
+    header {
+      position: relative;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    .app-card{
-      background:var(--card-bg);
-      border-radius:12px;
-      overflow:hidden;
-      cursor:pointer;
-      transition: transform .18s ease, box-shadow .18s ease;
-      display:flex;
-      flex-direction:column;
-      min-height:360px;
-      max-width:320px;
+    header img {
+      height: 45px;
     }
-    .app-card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(12,20,40,0.12) }
 
-    .app-media{ height:160px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    .app-media img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .login-btn {
+      background: #4f46e5;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .login-btn:hover {
+      background: #3730a3;
+    }
 
-    .app-body{ padding:14px; display:flex; flex-direction:column; gap:10px; flex:1; color:#0b1220 }
-    .app-body h3{ margin:0; font-size:1.02rem; color:#071033; }
-    .app-body p{ margin:0; color:#475569; font-size:0.9rem; line-height:1.35; flex:1; }
+    .filters {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 1rem;
+    }
 
-    .meta-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px }
-    .badge{ padding:6px 8px; border-radius:8px; font-weight:700; font-size:0.8rem; }
-    .cat-badge{ background: linear-gradient(90deg,#c4b5fd,#93c5fd); color:#071033 }
-    .paid { color:#b45309; font-weight:800 }
-    .free { color:#065f46; font-weight:800 }
+    .filters input, .filters select {
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      flex: 1;
+    }
 
-    /* ---------- STARS (rating) ---------- */
+    .app-grid {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 2rem auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 0 1rem;
+    }
+
+    .app-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .app-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .app-info {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .app-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0.2rem 0;
+    }
+
+    .app-category {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .price {
+      margin-top: 0.5rem;
+      font-weight: bold;
+      color: #4f46e5;
+    }
+
     .stars {
-      display:inline-block;
-      position:relative;
-      font-size:0; /* hide inline gaps */
-      line-height:0;
+      margin-top: 0.4rem;
+      color: #fbbf24;
     }
-    .stars .base {
-      color:#d1d5db;
-      font-size:18px;
-      letter-spacing:3px;
-    }
-    .stars .fill {
-      position:absolute; left:0; top:0; overflow:hidden;
-      color:#f59e0b;
-      white-space:nowrap;
-      font-size:18px;
-      pointer-events:none;
-    }
-    .stars button.star-btn{
-      background:transparent; border:none; padding:0; margin:0 2px; cursor:pointer; font-size:18px; color:transparent;
-      position:relative; width:22px; height:22px;
-    }
-    .stars button.star-btn::before{
-      content: '★';
-      position:absolute; left:0; top:0; color:transparent; text-shadow: 0 0 0 #d1d5db;
-    }
-    /* we will render stars via spans for display and buttons for rating overlay */
 
-    /* ---------- FOOTER ---------- */
-    footer.site-footer{
-      z-index:10; background: linear-gradient(180deg, rgba(12,14,23,0.04), rgba(12,14,23,0.08));
-      padding:28px 20px; text-align:center; border-top:1px solid rgba(0,0,0,0.04);
+    footer {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 2rem 1rem;
+      text-align: center;
+      position: relative;
+      z-index: 10;
     }
-    footer h4{ color:var(--accent); margin-bottom:6px }
-    footer p{ color:#475569; margin:6px 0 }
 
-    /* ---------- RESPONSIVE ---------- */
-    @media (max-width: 880px){
-      .apps-grid{ grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-      .search input{ width:160px; }
+    footer p {
+      margin: 0.3rem 0;
+      color: #444;
     }
-    @media (max-width: 520px){
-      header.app-header{ padding:10px; gap:10px; flex-direction:column; align-items:flex-start; }
-      .controls{ width:100%; justify-content:space-between; }
-      .search input{ width:100%; }
-      .apps-grid{ grid-template-columns: repeat(1, minmax(260px, 320px)); justify-items:center; }
+
+    footer a {
+      color: #4f46e5;
+      text-decoration: none;
+    }
+
+    .fa-whatsapp {
+      color: #25D366;
     }
   </style>
 </head>
 <body>
+  <div class="bubbles"></div>
 
-  <!-- BURBUJAS -->
-  <div class="bubbles" id="bubbles"></div>
-
-  <!-- HEADER -->
-  <header class="app-header">
-    <div class="brand">
-      <img src="logo.png" alt="Mi Store logo" />
-      <h1>Mi Store</h1>
-    </div>
-
-    <div class="controls">
-      <div class="search" role="search" aria-label="Buscar apps">
-        <input id="searchInput" type="search" placeholder="Buscar apps..." aria-label="Buscar apps" />
-      </div>
-
-      <select id="categoryFilter" class="select" aria-label="Filtrar por categoría">
-        <option value="">Todas las categorías</option>
-      </select>
-
-      <div class="header-actions">
-        <a class="btn secondary" href="login.html">Iniciar sesión</a>
-      </div>
-    </div>
+  <header>
+    <img src="logo.png" alt="Mi Store" />
+    <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
   </header>
 
-  <!-- MAIN -->
-  <main class="container" role="main">
-    <div class="apps-grid" id="appsGrid" aria-live="polite"></div>
-  </main>
+  <section class="filters">
+    <input type="text" id="searchInput" placeholder="Buscar app por nombre..." />
+    <select id="categoryFilter">
+      <option value="">Todas las categorías</option>
+    </select>
+    <select id="priceFilter">
+      <option value="">Todas</option>
+      <option value="free">Gratis</option>
+      <option value="paid">De pago</option>
+    </select>
+  </section>
 
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <h4>Desarrollado por:</h4>
-    <p>👨‍💻 Darwin Mercado – Ingeniero de Sistemas / Desarrollador Web</p>
-    <p>📧 <a href="mailto:darwinmercadoospino@gmail.com" style="color:var(--accent)">darwinmercadoospino@gmail.com</a></p>
-    <br>
-    <p>👨‍💻 Aynner Florez – Ingeniero de Sistemas / Desarrollador Móvil</p>
-    <p>📧 <a href="mailto:ajoseflorez@uniguajira.edu.co" style="color:var(--accent)">ajoseflorez@uniguajira.edu.co</a> 
-    <a href="https://wa.me/573013150359" target="_blank" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent)">
-    <img src="whatsapp.svg" alt="WhatsApp" width="18" height="18" style="vertical-align:middle">
-    +57 3013150359
-  </a>
+  <section class="app-grid" id="appGrid"></section>
+
+  <footer>
+    <p><strong>Desarrollado por:</strong></p>
+    <p>Darwin Mercado (Ingeniero de Sistemas - Desarrollador Web) — <a href="mailto:darwinmercadoospino@gmail.com">darwinmercadoospino@gmail.com</a></p>
+    <p>Aynner Florez (Ingeniero de Sistemas - Desarrollador Móvil) — <a href="mailto:ajoseflorez@uniguajira.edu.co">ajoseflorez@uniguajira.edu.co</a></p>
+    <p>Contacto: <i class="fab fa-whatsapp"></i> <a href="https://wa.me/573013150359" target="_blank">+57 301 315 0359</a></p>
   </footer>
 
   <script>
-    /* ---------- Crear burbujas animadas ---------- */
-    (function createBubbles(){
-      const container = document.getElementById('bubbles');
-      const n = 18;
-      for(let i=0;i<n;i++){
-        const b = document.createElement('div');
-        b.className = 'bubble';
-        const size = Math.round(30 + Math.random() * 120);
-        b.style.width = size + 'px';
-        b.style.height = size + 'px';
-        b.style.left = Math.random() * 100 + '%';
-        b.style.animationDuration = (18 + Math.random()*18) + 's';
-        b.style.animationDelay = (Math.random()*6) + 's';
-        b.style.opacity = (0.15 + Math.random()*0.6).toString();
-        // slight color variation
-        container.appendChild(b);
-      }
-    })();
-
-    /* ---------- Fetch apps & render ---------- */
-    const appsGrid = document.getElementById('appsGrid');
-    const searchInput = document.getElementById('searchInput');
-    const categoryFilter = document.getElementById('categoryFilter');
-
-    let appsData = [];
-
-    async function fetchApps(){
-      try{
-        const res = await fetch('/api/apps', { credentials: 'include' });
-        if(!res.ok) throw new Error('Error cargando apps');
-        const data = await res.json();
-        // esperaba: id,name,description,image,apk,category_name,is_paid,average_rating
-        appsData = Array.isArray(data) ? data : (data.items || []);
-        populateCategories();
-        renderApps();
-      }catch(err){
-        console.error(err);
-        appsGrid.innerHTML = '<p style="padding:24px;color:#7b8794">No se pudieron cargar las apps.</p>';
-      }
+    // --- Fondo burbujas ---
+    const bubbles = document.querySelector(".bubbles");
+    for (let i = 0; i < 15; i++) {
+      const b = document.createElement("div");
+      b.classList.add("bubble");
+      b.style.width = b.style.height = Math.random() * 60 + 20 + "px";
+      b.style.left = Math.random() * 100 + "%";
+      b.style.animationDuration = Math.random() * 15 + 10 + "s";
+      bubbles.appendChild(b);
     }
 
-    function populateCategories(){
-      const set = new Set(appsData.map(a=>a.category_name || a.category).filter(Boolean));
-      const optHtml = ['<option value="">Todas las categorías</option>', ...[...set].map(c=>`<option value="${c}">${c}</option>`)];
-      categoryFilter.innerHTML = optHtml.join('');
+    const appGrid = document.getElementById("appGrid");
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const priceFilter = document.getElementById("priceFilter");
+
+    let apps = [];
+
+    async function loadApps() {
+      const res = await fetch("/api/apps");
+      const data = await res.json();
+      apps = data;
+      renderApps();
+      fillCategories();
     }
 
-    function renderApps(){
-      const q = (searchInput.value || '').trim().toLowerCase();
+    function fillCategories() {
+      const cats = [...new Set(apps.map(a => a.category).filter(Boolean))];
+      cats.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        categoryFilter.appendChild(opt);
+      });
+    }
+
+    function renderApps() {
+      const search = searchInput.value.toLowerCase();
       const cat = categoryFilter.value;
-      const list = appsData.filter(a=>{
-        const nameMatch = a.name && a.name.toLowerCase().includes(q);
-        const descMatch = a.description && a.description.toLowerCase().includes(q);
-        const catMatch = !cat || (a.category_name || a.category) === cat;
-        return (nameMatch || descMatch) && catMatch;
+      const price = priceFilter.value;
+
+      const filtered = apps.filter(app => {
+        const matchesSearch = app.name.toLowerCase().includes(search);
+        const matchesCat = !cat || app.category === cat;
+        const matchesPrice =
+          !price ||
+          (price === "free" && !app.is_paid) ||
+          (price === "paid" && app.is_paid);
+        return matchesSearch && matchesCat && matchesPrice;
       });
 
-      if(list.length===0){
-        appsGrid.innerHTML = '<p style="padding:24px;color:#6b7280">No hay apps que coincidan.</p>';
-        return;
-      }
+      appGrid.innerHTML = "";
+      filtered.forEach(app => {
+        const card = document.createElement("div");
+        card.classList.add("app-card");
+        card.onclick = () => window.location.href = `app-details.html?id=${app.id}`;
 
-      appsGrid.innerHTML = list.map(a=> renderCardHtml(a)).join('');
-      // attach rating handlers
-      attachRatingHandlers();
-    }
-
-    function renderCardHtml(a){
-      const avg = a.average_rating !== undefined && a.average_rating !== null ? Number(a.average_rating) : (a.rating || 0);
-      const avgDisplay = avg ? avg.toFixed(1) : '—';
-      const category = a.category_name || a.category || 'General';
-      const paidLabel = a.is_paid ? '<span class="paid">De pago</span>' : '<span class="free">Gratis</span>';
-      // percentage for star fill (max 5 stars)
-      const pct = Math.max(0, Math.min(5, avg)) / 5 * 100;
-      return `
-        <article class="app-card" role="link" onclick="location.href='app-details.html?id=${a.id}'" aria-label="${escapeHtml(a.name)}">
-          <div class="app-media"><img src="${escapeHtml(a.image || 'placeholder.png')}" alt="${escapeHtml(a.name)}" /></div>
-          <div class="app-body">
+        card.innerHTML = `
+          <img src="${app.image}" alt="${app.name}" />
+          <div class="app-info">
             <div>
-              <h3>${escapeHtml(a.name)}</h3>
-              <p>${escapeHtml((a.description||'').slice(0,140))}${(a.description||'').length>140? '...' : ''}</p>
+              <h3 class="app-title">${app.name}</h3>
+              <p class="app-category">${app.category || "Sin categoría"}</p>
+              <div class="stars">${renderStars(app.average_rating || 0)}</div>
             </div>
-            <div class="meta-row">
-              <div style="display:flex;align-items:center;gap:8px">
-                <span class="badge cat-badge">${escapeHtml(category)}</span>
-                <span>${paidLabel}</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <div class="stars" data-app-id="${a.id}" data-average="${avg}">
-                  <div class="base">★★★★★</div>
-                  <div class="fill" style="width:${pct}%">★★★★★</div>
-                </div>
-                <div style="font-weight:700;color:#475569;font-size:.9rem">${avgDisplay}</div>
-              </div>
-            </div>
+            <div class="price">${app.is_paid ? "De pago" : "Gratis"}</div>
           </div>
-        </article>
-      `;
-    }
+        `;
 
-    // escape helper
-    function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-
-    // attach interactive rating handlers (click on card star area to open rating UI)
-    function attachRatingHandlers(){
-      const starContainers = document.querySelectorAll('.stars');
-      starContainers.forEach(cont => {
-        // create overlay buttons (1..5) on top for rating clicks
-        if(cont.dataset.bound) return;
-        cont.dataset.bound = '1';
-        const appId = cont.getAttribute('data-app-id');
-        // create 5 transparent buttons over the stars for rating
-        for(let i=1;i<=5;i++){
-          const btn = document.createElement('button');
-          btn.className = 'star-btn';
-          btn.title = `Valorar ${i} estrella${i>1?'s':''}`;
-          btn.style.position='relative';
-          btn.style.background='transparent';
-          btn.style.border='none';
-          btn.style.width = '22px';
-          btn.style.height = '22px';
-          btn.style.margin = '0';
-          // position inline
-          btn.addEventListener('click', async (e)=>{
-            e.stopPropagation();
-            e.preventDefault();
-            await submitRating(appId, i);
-          });
-          cont.appendChild(btn);
-        }
+        appGrid.appendChild(card);
       });
     }
 
-    async function submitRating(appId, rating){
-      try{
-        const res = await fetch(`/api/apps/${appId}/rate`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rating })
-        });
-        if(res.status === 401){
-          // not logged in — redirect to login
-          alert('Debes iniciar sesión para dar una valoración.');
-          window.location.href = '/login.html';
-          return;
-        }
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.message || 'Error al valorar');
-        // update local app average
-        const idx = appsData.findIndex(x=>String(x.id)===String(appId));
-        if(idx>=0) appsData[idx].average_rating = data.average;
-        renderApps();
-        showTransient('Calificación enviada ✅');
-      }catch(err){
-        console.error(err);
-        alert(err.message || 'No fue posible enviar la calificación');
+    function renderStars(rating) {
+      const rounded = Math.round(rating);
+      let starsHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        starsHTML += `<i class="fa${i <= rounded ? 's' : 'r'} fa-star"></i>`;
       }
+      return starsHTML;
     }
 
-    function showTransient(msg){
-      const t = document.createElement('div');
-      t.textContent = msg;
-      t.style.position='fixed';
-      t.style.right='18px';
-      t.style.bottom='18px';
-      t.style.background='#10b981';
-      t.style.color='white';
-      t.style.padding='10px 14px';
-      t.style.borderRadius='10px';
-      t.style.zIndex=9999;
-      document.body.appendChild(t);
-      setTimeout(()=> t.remove(), 2200);
-    }
+    searchInput.addEventListener("input", renderApps);
+    categoryFilter.addEventListener("change", renderApps);
+    priceFilter.addEventListener("change", renderApps);
 
-    /* ---------- Search & filter handlers ---------- */
-    searchInput.addEventListener('input', () => renderApps());
-    categoryFilter.addEventListener('change', () => renderApps());
-
-    /* ---------- On load ---------- */
-    window.addEventListener('load', fetchApps);
+    loadApps();
   </script>
 </body>
 </html>
-
