@@ -229,6 +229,48 @@ app.post("/api/rate/:appId", async (req, res) => {
 });
 
 // ================================
+// ⭐ COMENTARIOS Y VALORACIONES
+// ================================
+
+// Obtener reseñas de una app
+app.get("/api/apps/:id/reviews", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await db.query(
+      "SELECT username, rating, comment, created_at FROM app_reviews WHERE app_id = $1 ORDER BY created_at DESC",
+      [id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error al obtener reseñas:", error);
+    res.status(500).json({ message: "Error al obtener reseñas" });
+  }
+});
+
+// Agregar una nueva reseña
+app.post("/api/apps/:id/reviews", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, rating, comment } = req.body;
+
+    if (!username || !rating)
+      return res.status(400).json({ message: "Faltan datos obligatorios" });
+
+    await db.query(
+      `INSERT INTO app_reviews (app_id, username, rating, comment)
+       VALUES ($1, $2, $3, $4)`,
+      [id, username, rating, comment]
+    );
+
+    res.json({ message: "Reseña agregada con éxito" });
+  } catch (error) {
+    console.error("❌ Error al agregar reseña:", error);
+    res.status(500).json({ message: "Error al agregar reseña" });
+  }
+});
+
+
+// ================================
 // 🗑️ ELIMINAR APP
 // ================================
 app.delete("/apps/:id", async (req, res) => {
@@ -266,3 +308,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
