@@ -301,6 +301,64 @@ app.delete("/apps/:id", async (req, res) => {
   }
 });
 
+// ======================================================
+// 🔹 Reseñas de aplicaciones
+// ======================================================
+
+// Obtener todas las reseñas de una app
+app.get('/api/apps/:id/reviews', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT username, rating, comment, TO_CHAR(created_at, 'YYYY-MM-DD HH24:MI') AS created_at
+       FROM app_reviews
+       WHERE app_id = $1
+       ORDER BY created_at DESC`,
+      [id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error al obtener reseñas:", error);
+    res.status(500).json({ error: "Error al obtener reseñas" });
+  }
+});
+
+// Agregar una nueva reseña con valoración
+app.post('/api/apps/:id/reviews', async (req, res) => {
+  const { id } = req.params;
+  const { username, rating, comment } = req.body;
+
+  if (!username || !rating) {
+    return res.status(400).json({ error: "Faltan datos requeridos" });
+  }
+
+  try {
+    // Insertar reseña
+    await pool.query(
+      `INSERT INTO app_reviews (app_id, username, rating, comment)
+       VALUES ($1, $2, $3, $4)`,
+      [id, username, rating, comment]
+    );
+
+    // Recalcular promedio de calificación
+    await pool.query(`
+      UPDATE apps
+      SET average_rating = (
+        SELECT ROUND(AVG(rating)::numeric, 2)
+        FROM app_reviews
+        WHERE app_id = $1
+      )
+      WHERE id = $1
+    `, [id]);
+
+    res.json({ success: true, message: "Reseña agregada con éxito" });
+  } catch (error) {
+    console.error("❌ Error al agregar reseña:", error);
+    res.status(500).json({ error: "Error al agregar reseña" });
+  }
+});
+
+
 // ================================
 // ⚙️ INICIAR SERVIDOR
 // ================================
@@ -308,4 +366,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
 
