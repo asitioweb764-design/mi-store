@@ -13,12 +13,8 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import db from "./db.js"; // conexión PostgreSQL
 
-import express from "express";
 import pkg from "pg";
 const { Pool } = pkg;
-
-const app = express();
-app.use(express.json());
 
 // Conexión a tu base de datos (ajusta credenciales)
 const pool = new Pool({
@@ -474,6 +470,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
+
 
 
 
