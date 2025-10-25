@@ -9,160 +9,150 @@
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #e0e7ff, #ede9fe);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
       height: 100vh;
-      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .login-box {
       background: white;
-      padding: 2.5rem;
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      width: 350px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
       text-align: center;
-      position: relative;
-      z-index: 10;
     }
 
     h2 {
-      margin-bottom: 1.5rem;
-      color: #111;
+      margin-bottom: 1rem;
+      color: #4f46e5;
     }
 
-    input {
+    .input-group {
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 0.4rem;
+    }
+
+    .input-group input {
       width: 100%;
       padding: 0.8rem;
-      margin-bottom: 1rem;
-      border-radius: 10px;
       border: 1px solid #ccc;
+      border-radius: 10px;
       font-size: 1rem;
     }
 
-    button {
+    .login-btn {
       width: 100%;
       padding: 0.8rem;
-      border: none;
-      border-radius: 25px;
       background: #4f46e5;
       color: white;
+      border: none;
+      border-radius: 25px;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: 0.3s;
+      font-weight: 600;
     }
 
-    button:hover {
+    .login-btn:hover {
       background: #3730a3;
     }
 
     .error {
-      color: red;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
+      margin-top: 1rem;
+      color: #dc2626;
+      background: #fee2e2;
+      border-radius: 10px;
+      padding: 0.5rem;
+      display: none;
     }
 
-    .back-link {
+    .back {
+      margin-top: 1rem;
       display: inline-block;
-      margin-top: 1.5rem;
-      text-decoration: none;
       color: #4f46e5;
+      text-decoration: none;
     }
 
-    .back-link:hover {
+    .back:hover {
       text-decoration: underline;
-    }
-
-    /* Burbujas de fondo */
-    .bubbles {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 0;
-    }
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 50%;
-      animation: rise 20s infinite ease-in;
-    }
-    @keyframes rise {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-1200px) scale(1.3); opacity: 0; }
     }
   </style>
 </head>
 <body>
-  <div class="bubbles"></div>
-
   <div class="login-box">
-    <h2>Iniciar sesión</h2>
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="Usuario" required />
-      <input type="password" id="password" placeholder="Contraseña" required />
-      <button type="submit">Entrar</button>
-      <p class="error" id="errorMsg"></p>
-    </form>
-    <a href="index.html" class="back-link"><i class="fa fa-arrow-left"></i> Volver a la tienda</a>
+    <h2><i class="fa-solid fa-store"></i> Mi Store</h2>
+    <div class="input-group">
+      <label for="username">Usuario</label>
+      <input type="text" id="username" placeholder="Ingresa tu usuario" required>
+    </div>
+    <div class="input-group">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+    </div>
+    <button class="login-btn" onclick="login()">Iniciar sesión</button>
+    <div class="error" id="errorBox"></div>
+    <a href="index.html" class="back"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
   </div>
 
   <script>
-    // Fondo burbujas animadas
-    const bubbles = document.querySelector(".bubbles");
-    for (let i = 0; i < 15; i++) {
-      const b = document.createElement("div");
-      b.classList.add("bubble");
-      b.style.width = b.style.height = Math.random() * 60 + 20 + "px";
-      b.style.left = Math.random() * 100 + "%";
-      b.style.animationDuration = Math.random() * 15 + 10 + "s";
-      bubbles.appendChild(b);
-    }
-
-    const form = document.getElementById("loginForm");
-    const errorMsg = document.getElementById("errorMsg");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      errorMsg.textContent = "";
-
+    async function login() {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
+      const errorBox = document.getElementById("errorBox");
+      errorBox.style.display = "none";
+
+      if (!username || !password) {
+        showError("Por favor ingresa usuario y contraseña.");
+        return;
+      }
 
       try {
         const res = await fetch("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
+          body: JSON.stringify({ username, password })
         });
 
         const data = await res.json();
 
         if (!data.success) {
-          errorMsg.textContent = data.message || "Credenciales incorrectas";
+          showError(data.message || "Credenciales inválidas.");
           return;
         }
 
-        // Guardar sesión en sessionStorage
+        // Guardar en sessionStorage
         sessionStorage.setItem("username", username);
         sessionStorage.setItem("role", data.role);
 
+        // Redirigir según rol
         if (data.role === "admin") {
-          window.location.href = "admin.html"; // Cambia por tu panel admin real
+          window.location.href = "admin.html";
         } else {
           window.location.href = "index.html";
         }
 
       } catch (err) {
-        console.error("Error de login:", err);
-        errorMsg.textContent = "Error de conexión con el servidor.";
+        showError("Error de conexión con el servidor.");
+        console.error(err);
       }
-    });
+    }
+
+    function showError(msg) {
+      const errorBox = document.getElementById("errorBox");
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+    }
   </script>
 </body>
 </html>
