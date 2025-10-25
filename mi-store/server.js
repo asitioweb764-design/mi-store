@@ -273,7 +273,76 @@ app.post("/api/apps/:id/reviews", async (req, res) => {
 });
 
 // ================================
+// ⭐ VALORACIONES DE APPS
+// ================================
+
+// Crear o actualizar una valoración
+app.post("/api/ratings", async (req, res) => {
+  try {
+    const { user_id, app_id, rating } = req.body;
+
+    if (!user_id || !app_id || !rating) {
+      return res.status(400).json({ message: "Faltan datos requeridos." });
+    }
+
+    // Verificar si el usuario ya valoró esta app
+    const existing = await db.query(
+      "SELECT id FROM ratings WHERE user_id = $1 AND app_id = $2",
+      [user_id, app_id]
+    );
+
+    if (existing.rows.length > 0) {
+      // Actualizar valoración existente
+      await db.query(
+        "UPDATE ratings SET rating = $1, created_at = NOW() WHERE user_id = $2 AND app_id = $3",
+        [rating, user_id, app_id]
+      );
+    } else {
+      // Crear nueva valoración
+      await db.query(
+        "INSERT INTO ratings (user_id, app_id, rating, created_at) VALUES ($1, $2, $3, NOW())",
+        [user_id, app_id, rating]
+      );
+    }
+
+    // Recalcular promedio y actualizar en apps
+    const avgRes = await db.query(
+      "SELECT ROUND(AVG(rating)::numeric, 1) AS avg FROM ratings WHERE app_id = $1",
+      [app_id]
+    );
+    const avg = avgRes.rows[0].avg || 0;
+
+    await db.query("UPDATE apps SET rating = $1 WHERE id = $2", [avg, app_id]);
+
+    res.json({ message: "Valoración guardada correctamente", average: avg });
+  } catch (error) {
+    console.error("❌ Error al guardar valoración:", error);
+    res.status(500).json({ message: "Error al guardar valoración", error: error.message });
+  }
+});
+
+// Obtener promedio y total de valoraciones por app
+app.get("/api/ratings/:appId", async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const result = await db.query(
+      `SELECT 
+        COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average_rating,
+        COUNT(id) AS total_ratings
+       FROM ratings WHERE app_id = $1`,
+      [appId]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("❌ Error al obtener valoraciones:", error);
+    res.status(500).json({ message: "Error al obtener valoraciones", error: error.message });
+  }
+});
+
+
+// ================================
 // 🚀 INICIAR SERVIDOR
 // ================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+
