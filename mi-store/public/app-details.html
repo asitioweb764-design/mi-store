@@ -4,314 +4,200 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Detalles de la App | Mi Store</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #d7d9ff, #c5b7ff);
+      background: linear-gradient(135deg, #a2b6ff, #d6a4ff);
       overflow-x: hidden;
-      color: #222;
+      min-height: 100vh;
     }
 
-    /* Burbujas animadas */
-    .bubble {
+    /* Fondo con burbujas animadas */
+    .bubbles {
       position: fixed;
-      bottom: -100px;
-      width: 40px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      animation: floatUp 10s linear infinite;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      overflow: hidden;
       z-index: 0;
     }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(1); opacity: 0.8; }
-      100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+
+    .bubble {
+      position: absolute;
+      bottom: -150px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      animation: rise 10s infinite ease-in;
     }
 
-    header {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
+    @keyframes rise {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-1200px) scale(1.5); opacity: 0; }
+    }
+
+    /* Contenedor principal */
+    .container {
+      position: relative;
       z-index: 10;
+      max-width: 800px;
+      margin: 80px auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
-    header img {
-      height: 50px;
-    }
-
-    header button {
-      background: #6a5acd;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.2s;
-    }
-    header button:hover {
-      background: #5848c2;
-    }
-
-    main {
+    .app-header {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .app-card {
-      background: white;
-      max-width: 700px;
-      width: 100%;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 30px;
       text-align: center;
-      margin-bottom: 40px;
     }
 
-    .app-card img {
-      width: 150px;
-      height: 150px;
+    .app-header img {
+      width: 120px;
+      height: 120px;
+      border-radius: 20px;
       object-fit: cover;
-      border-radius: 20%;
+      margin-bottom: 10px;
+    }
+
+    .app-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .category {
+      font-size: 0.9rem;
+      color: #777;
       margin-bottom: 15px;
     }
 
-    .rating {
-      color: #ffc107;
-      font-size: 1.3em;
+    .price {
+      font-size: 1rem;
+      color: #4a00e0;
+      font-weight: 600;
+      margin-bottom: 20px;
     }
 
-    .download-btn {
-      background: #6a5acd;
-      color: white;
+    .description {
+      text-align: justify;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* Valoración */
+    .rating {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .stars {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      font-size: 1.8rem;
+      cursor: pointer;
+    }
+
+    .star {
+      color: #ccc;
+      transition: color 0.2s;
+    }
+
+    .star.active {
+      color: #f1c40f;
+    }
+
+    /* Botones */
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      padding: 12px 20px;
       border: none;
-      padding: 12px 24px;
       border-radius: 10px;
       cursor: pointer;
-      font-size: 1rem;
-      margin-top: 20px;
-      transition: 0.2s;
+      font-weight: bold;
+      transition: transform 0.2s, background 0.3s;
     }
 
-    .download-btn:hover {
-      background: #5848c2;
+    .btn-download {
+      background: #4a00e0;
+      color: white;
     }
 
-    section.reviews {
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 16px;
-      padding: 25px;
-      max-width: 700px;
-      width: 100%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    .btn-download:hover {
+      background: #6a11cb;
+      transform: scale(1.05);
     }
 
-    section.reviews h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      text-align: center;
+    .btn-back {
+      background: #ddd;
     }
 
-    .review {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-    }
-    .review:last-child {
-      border-bottom: none;
-    }
-
-    form.add-review {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    input, textarea, select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 70px;
-    }
-
-    footer {
-      margin-top: 60px;
-      padding: 30px 10px;
-      text-align: center;
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(8px);
-      border-top: 1px solid #ddd;
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: #6a5acd;
-      text-decoration: none;
-      font-weight: 600;
+    .btn-back:hover {
+      background: #ccc;
+      transform: scale(1.05);
     }
 
     @media (max-width: 600px) {
-      .app-card img {
-        width: 120px;
-        height: 120px;
+      .container {
+        margin: 50px 15px;
+        padding: 20px;
       }
-      .download-btn {
-        width: 100%;
+
+      .app-header img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .app-title {
+        font-size: 1.4rem;
       }
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="logo.png" alt="Logo Mi Store">
-    <div>
-      <button onclick="location.href='index.html'">Volver</button>
-      <button onclick="location.href='login.html'">Login</button>
-    </div>
-  </header>
+  <div class="bubbles"></div>
 
-  <main>
-    <div class="app-card" id="appDetails">
-      <h2>Cargando...</h2>
+  <div class="container">
+    <div class="app-header">
+      <img id="app-image" src="" alt="App image">
+      <div class="app-title" id="app-name">Nombre de la App</div>
+      <div class="category" id="app-category">Categoría</div>
+      <div class="price" id="app-price">Gratis</div>
     </div>
 
-    <section class="reviews">
-      <h3>Valoraciones y reseñas</h3>
-      <div id="reviewsList">Cargando reseñas...</div>
+    <div class="description" id="app-description">
+      Cargando descripción...
+    </div>
 
-      <form class="add-review" id="reviewForm">
-        <h4>Agregar una reseña</h4>
-        <input type="text" id="username" placeholder="Tu nombre (opcional)">
-        <select id="rating">
-          <option value="">Selecciona estrellas</option>
-          <option value="5">⭐⭐⭐⭐⭐</option>
-          <option value="4">⭐⭐⭐⭐</option>
-          <option value="3">⭐⭐⭐</option>
-          <option value="2">⭐⭐</option>
-          <option value="1">⭐</option>
-        </select>
-        <textarea id="comment" placeholder="Escribe un comentario (opcional)"></textarea>
-        <button type="submit" class="download-btn">Enviar reseña</button>
-      </form>
-    </section>
-  </main>
+    <div class="rating">
+      <div>Valoración:</div>
+      <div class="stars" id="stars"></div>
+    </div>
 
-  <footer>
-    <p>
-      Desarrollado por <strong>Darwin Mercado</strong> (Desarrollador Web) – 
-      <a href="mailto:darwinmercadoospino@gmail.com">darwinmercadoospino@gmail.com</a><br>
-      y <strong>Aynner Florez</strong> (Desarrollador Móvil) – 
-      <a href="mailto:ajoseflorez@uniguajira.edu.co">ajoseflorez@uniguajira.edu.co</a><br>
-      <a href="https://wa.me/573013150359" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-    </p>
-  </footer>
+    <div class="buttons">
+      <button class="btn-back" onclick="window.location.href='index.html'">← Volver a la tienda</button>
+      <button class="btn-download" id="download-btn" style="display:none;">Descargar</button>
+    </div>
+  </div>
 
   <script>
-    // 🫧 Generar burbujas
-    for (let i = 0; i < 15; i++) {
-      const b = document.createElement("div");
-      b.className = "bubble";
-      b.style.left = Math.random() * 100 + "vw";
-      b.style.width = b.style.height = 20 + Math.random() * 40 + "px";
-      b.style.animationDuration = 8 + Math.random() * 6 + "s";
-      b.style.animationDelay = Math.random() * 5 + "s";
-      document.body.appendChild(b);
-    }
-
-    const appId = new URLSearchParams(window.location.search).get("id");
-    const appDetails = document.getElementById("appDetails");
-    const reviewsList = document.getElementById("reviewsList");
-
-    async function loadApp() {
-      const res = await fetch(`/api/apps`);
-      const data = await res.json();
-      const app = data.find(a => a.id == appId);
-      if (!app) {
-        appDetails.innerHTML = "<p>No se encontró la aplicación.</p>";
-        return;
-      }
-
-      appDetails.innerHTML = `
-        <img src="${app.image}" alt="${app.name}">
-        <h2>${app.name}</h2>
-        <div class="rating">${"★".repeat(Math.round(app.rating || 0))}${"☆".repeat(5 - Math.round(app.rating || 0))}</div>
-        <p>${app.description}</p>
-        <p><strong>Categoría:</strong> ${app.category || "Sin categoría"}</p>
-        <p><strong>${app.is_paid ? "💰 De pago" : "🆓 Gratuita"}</strong></p>
-        <button class="download-btn" onclick="handleDownload('${app.apk}', ${app.is_paid})">Descargar</button>
-      `;
-    }
-
-    async function loadReviews() {
-      const res = await fetch(`/api/apps/${appId}/reviews`);
-      const data = await res.json();
-      if (data.length === 0) {
-        reviewsList.innerHTML = "<p>Aún no hay reseñas.</p>";
-        return;
-      }
-      reviewsList.innerHTML = data.map(r => `
-        <div class="review">
-          <div><strong>${r.username}</strong> - ${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</div>
-          <p>${r.comment || ""}</p>
-        </div>
-      `).join("");
-    }
-
-    async function handleDownload(url, isPaid) {
-      const loggedIn = sessionStorage.getItem("loggedIn");
-      if (!loggedIn) {
-        alert("Debes iniciar sesión para descargar apps.");
-        location.href = "login.html";
-        return;
-      }
-      if (isPaid) {
-        alert("Esta app es de pago. Contacta a los desarrolladores para más información.");
-        return;
-      }
-      window.open(url, "_blank");
-    }
-
-    document.getElementById("reviewForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const username = document.getElementById("username").value;
-      const rating = document.getElementById("rating").value;
-      const comment = document.getElementById("comment").value;
-      if (!rating) return alert("Por favor selecciona una valoración.");
-
-      const res = await fetch(`/api/apps/${appId}/reviews`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, rating, comment })
-      });
-      if (res.ok) {
-        alert("Reseña enviada con éxito.");
-        loadReviews();
-        e.target.reset();
-      } else {
-        alert("Error al enviar la reseña.");
-      }
-    });
-
-    loadApp();
-    loadReviews();
-  </script>
-</body>
-</html>
+    // === Generar burbujas ===
+    const bubblesContainer = document.querySelector(".bubbles");
+    for (let i = 0; i < 20; i++) {
+      const bubble =
