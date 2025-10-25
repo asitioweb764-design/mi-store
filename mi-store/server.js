@@ -261,3 +261,53 @@ app.get("/health", (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Server listening on", PORT));
+
+// ================================
+// 🌟 RESEÑAS Y VALORACIONES
+// ================================
+
+// Obtener reseñas de una app
+app.get("/api/apps/:id/reviews", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await db.query(
+      "SELECT username, rating, comment, created_at FROM reviews WHERE app_id = $1 ORDER BY created_at DESC",
+      [id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error al obtener reseñas:", error);
+    res.status(500).json({ message: "Error al obtener reseñas" });
+  }
+});
+
+// Agregar una reseña
+app.post("/api/apps/:id/reviews", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, rating, comment } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Valoración inválida" });
+    }
+
+    await db.query(
+      "INSERT INTO reviews (app_id, username, rating, comment) VALUES ($1, $2, $3, $4)",
+      [id, username || "Anónimo", rating, comment || ""]
+    );
+
+    // Calcular nueva media de valoraciones
+    const avg = await db.query(
+      "SELECT ROUND(AVG(rating), 1) AS avg_rating FROM reviews WHERE app_id = $1",
+      [id]
+    );
+    await db.query("UPDATE apps SET rating = $1 WHERE id = $2", [avg.rows[0].avg_rating, id]);
+
+    res.json({ message: "✅ Reseña añadida con éxito" });
+  } catch (error) {
+    console.error("❌ Error al agregar reseña:", error);
+    res.status(500).json({ message: "Error al agregar reseña" });
+  }
+});
+
+
